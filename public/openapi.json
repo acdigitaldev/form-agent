@@ -1,0 +1,199 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "AgentForms API",
+    "description": "Create forms and read submissions/leads. Every form gets a hosted public URL that end-users fill out directly.",
+    "version": "1.0.0"
+  },
+  "servers": [{ "url": "http://localhost:3000" }],
+  "security": [{ "bearerAuth": [] }],
+  "paths": {
+    "/api/v1/forms": {
+      "get": {
+        "operationId": "listForms",
+        "summary": "List all forms owned by the authenticated user",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/FormListResponse" } } }
+          }
+        }
+      },
+      "post": {
+        "operationId": "createForm",
+        "summary": "Create a new form and get back its hosted public URL",
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/CreateFormRequest" } } }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/FormResponse" } } }
+          }
+        }
+      }
+    },
+    "/api/v1/forms/{id}": {
+      "get": {
+        "operationId": "getForm",
+        "summary": "Get a single form by id",
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/FormResponse" } } }
+          }
+        }
+      },
+      "patch": {
+        "operationId": "updateForm",
+        "summary": "Update a form's name, fields, messaging, or active status",
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/UpdateFormRequest" } } }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/FormResponse" } } }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteForm",
+        "summary": "Permanently delete a form and its submissions",
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "responses": { "200": { "description": "OK" } }
+      }
+    },
+    "/api/v1/forms/{id}/submissions": {
+      "get": {
+        "operationId": "listSubmissions",
+        "summary": "List leads/submissions received by a form",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "limit", "in": "query", "required": false, "schema": { "type": "integer", "default": 50, "maximum": 200 } }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/SubmissionListResponse" } } }
+          }
+        }
+      }
+    },
+    "/api/v1/submissions": {
+      "get": {
+        "operationId": "listAllSubmissions",
+        "summary": "List submissions across all forms, optionally filtered to one form",
+        "parameters": [
+          { "name": "formId", "in": "query", "required": false, "schema": { "type": "string" } },
+          { "name": "limit", "in": "query", "required": false, "schema": { "type": "integer", "default": 50, "maximum": 200 } }
+        ],
+        "responses": { "200": { "description": "OK" } }
+      }
+    },
+    "/api/v1/analytics": {
+      "get": {
+        "operationId": "getAnalytics",
+        "summary": "Get submission analytics for the workspace: totals, 7/30-day counts, daily trend, top forms",
+        "responses": { "200": { "description": "OK" } }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": { "type": "http", "scheme": "bearer" }
+    },
+    "schemas": {
+      "FieldType": {
+        "type": "string",
+        "enum": ["text", "email", "phone", "textarea", "select", "checkbox", "number", "url"]
+      },
+      "FormField": {
+        "type": "object",
+        "required": ["id", "label", "type"],
+        "properties": {
+          "id": { "type": "string", "description": "Stable identifier for this field, used as the key in submission data" },
+          "label": { "type": "string" },
+          "type": { "$ref": "#/components/schemas/FieldType" },
+          "required": { "type": "boolean", "default": false },
+          "placeholder": { "type": "string" },
+          "options": { "type": "array", "items": { "type": "string" }, "description": "Required for type=select" }
+        }
+      },
+      "CreateFormRequest": {
+        "type": "object",
+        "required": ["name", "fields"],
+        "properties": {
+          "name": { "type": "string" },
+          "description": { "type": "string" },
+          "fields": { "type": "array", "items": { "$ref": "#/components/schemas/FormField" }, "minItems": 1 },
+          "successMessage": { "type": "string" },
+          "redirectUrl": { "type": "string", "format": "uri" },
+          "gdprText": { "type": "string", "description": "Privacy/consent notice shown below the submit button" },
+          "ctaText": { "type": "string", "description": "Submit button label, defaults to 'Submit'" }
+        }
+      },
+      "UpdateFormRequest": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "description": { "type": "string", "nullable": true },
+          "fields": { "type": "array", "items": { "$ref": "#/components/schemas/FormField" } },
+          "successMessage": { "type": "string" },
+          "redirectUrl": { "type": "string", "nullable": true },
+          "gdprText": { "type": "string" },
+          "ctaText": { "type": "string" },
+          "isActive": { "type": "boolean" }
+        }
+      },
+      "Form": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "name": { "type": "string" },
+          "slug": { "type": "string" },
+          "description": { "type": "string", "nullable": true },
+          "fields": { "type": "array", "items": { "$ref": "#/components/schemas/FormField" } },
+          "gdprText": { "type": "string" },
+          "ctaText": { "type": "string" },
+          "successMessage": { "type": "string" },
+          "redirectUrl": { "type": "string", "nullable": true },
+          "isActive": { "type": "boolean" },
+          "publicUrl": { "type": "string", "description": "Hosted URL end-users fill out" },
+          "submissionCount": { "type": "integer" },
+          "createdAt": { "type": "string", "format": "date-time" },
+          "updatedAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "FormResponse": {
+        "type": "object",
+        "properties": { "form": { "$ref": "#/components/schemas/Form" } }
+      },
+      "FormListResponse": {
+        "type": "object",
+        "properties": { "forms": { "type": "array", "items": { "$ref": "#/components/schemas/Form" } } }
+      },
+      "Submission": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "data": { "type": "object", "additionalProperties": true },
+          "createdAt": { "type": "string", "format": "date-time" },
+          "sourceIp": { "type": "string", "nullable": true }
+        }
+      },
+      "SubmissionListResponse": {
+        "type": "object",
+        "properties": {
+          "formId": { "type": "string" },
+          "total": { "type": "integer" },
+          "submissions": { "type": "array", "items": { "$ref": "#/components/schemas/Submission" } }
+        }
+      }
+    }
+  }
+}

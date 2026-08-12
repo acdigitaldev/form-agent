@@ -1,0 +1,136 @@
+import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { z } from "zod";
+import {
+  listForms,
+  createForm,
+  getForm,
+  updateForm,
+  deleteForm,
+  listSubmissionsForForm,
+} from "@/lib/formsService";
+
+const fieldTypeSchema = z
+  .enum(["text", "email", "phone", "textarea", "select", "checkbox", "number", "url"])
+  .describe("Input type to render for this field");
+
+const fieldSchema = z.object({
+  id: z.string().describe("Stable key for this field, used as the key in submission data (e.g. 'email')"),
+  label: z.string().describe("Human-readable label shown on the form"),
+  type: fieldTypeSchema,
+  required: z.boolean().optional().default(false),
+  placeholder: z.string().optional(),
+  options: z.array(z.string()).optional().describe("Choices for type='select'"),
+});
+
+function textResult(data: unknown) {
+  return { content: [{ type: "text" as const, text: JSON.stringify(data, null, 2) }] };
+}
+
+function errorResult(message: string) {
+  return { content: [{ type: "text" as const, text: `Error: ${message}` }], isError: true };
+}
+
+/** Builds a fresh MCP server scoped to one workspace. Cheap — safe to build per-request. */
+export function buildMcpServerForWorkspace(workspaceId: string) {
+  const server = new McpServer({ name: "agentforms", version: "1.0.0" });
+
+  server.registerTool(
+    "create_form",
+    {
+      title: "Create a form",
+      description:
+        "Create a new lead-capture form and get back a hosted public URL that anyone can fill out. Use this whenever the user wants a new form, survey, or signup page.",
+      inputSchema: {
+        name: z.string().describe("Short name for the form, e.g. 'Newsletter signup'"),
+        description: z.string().optional(),
+        fields: z.array(fieldSchema).min(1).describe("The fields end-users will fill in, in order"),
+        successMessage: z.string().optional(),
+        redirectUrl: z.string().url().optional(),
+        gdprText: z.string().optional().describe("Privacy/consent notice shown below the submit button"),
+        ctaText: z.string().optional().describe("Submit button label, defaults to 'Submit'"),
+      },
+    },
+    async (input) => {
+      try {
+        return textResult({ form: await createForm(workspaceId, input) });
+      } catch (err) {
+        return errorResult(String(err));
+      }
+    }
+  );
+
+  server.registerTool(
+    "list_forms",
+    {
+      title: "List forms",
+      description: "List all forms in this workspace, with their public URLs and submission counts.",
+      inputSchema: {},
+    },
+    async () => textResult({ forms: await listForms(workspaceId) })
+  );
+
+  server.registerTool(
+    "get_form",
+    {
+      title: "Get a form",
+      description: "Get the full definition of a single form by its id.",
+      inputSchema: { formId: z.string() },
+    },
+    async ({ formId }) => {
+      const form = await getForm(workspaceId, formId);
+      return form ? textResult({ form }) : errorResult("Form not found");
+    }
+  );
+
+  server.registerTool(
+    "update_form",
+    {
+      title: "Update a form",
+      description:
+        "Update a form's name, description, fields, success message, redirect URL, GDPR notice, or active status. Only include fields you want to change.",
+      inputSchema: {
+        formId: z.string(),
+        name: z.string().optional(),
+        description: z.string().nullable().optional(),
+        fields: z.array(fieldSchema).optional(),
+        successMessage: z.string().optional(),
+        redirectUrl: z.string().url().nullable().optional(),
+        gdprText: z.string().optional(),
+        ctaText: z.string().optional(),
+        isActive: z.boolean().optional().describe("Set false to pause the form"),
+      },
+    },
+    async ({ formId, ...patch }) => {
+      const form = await updateForm(workspaceId, formId, patch);
+      return form ? textResult({ form }) : errorResult("Form not found");
+    }
+  );
+
+  server.registerTool(
+    "delete_form",
+    {
+      title: "Delete a form",
+      description: "Permanently delete a form and all of its submissions. This cannot be undone.",
+      inputSchema: { formId: z.string() },
+    },
+    async ({ formId }) => {
+      const deleted = await deleteForm(workspaceId, formId);
+      return deleted ? textResult({ ok: true }) : errorResult("Form not found");
+    }
+  );
+
+  server.registerTool(
+    "list_submissions",
+    {
+      title: "List submissions / leads",
+      description: "List the leads/submissions a form has received, most recent first.",
+      inputSchema: { formId: z.string(), limit: z.number().int().min(1).max(200).optional() },
+    },
+    async ({ formId, limit }) => {
+      const result = await listSubmissionsForForm(workspaceId, formId, limit);
+      return result ? textResult(result) : errorResult("Form not found");
+    }
+  );
+
+  return server;
+}

@@ -1,0 +1,22 @@
+{
+  "name": "agentforms-mcp",
+  "version": "0.1.0",
+  "description": "MCP server for AgentForms — create forms and read leads from Claude or any MCP client.",
+  "type": "module",
+  "bin": {
+    "agentforms-mcp": "dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/index.js",
+    "dev": "tsc -p tsconfig.json --watch"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.12.0",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.2",
+    "@types/node": "^22.10.2"
+  }
+}

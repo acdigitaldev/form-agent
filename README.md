@@ -1,36 +1,58 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# AgentForms
 
-## Getting Started
+Forms and lead capture for AI agents. Connect once — from Claude, ChatGPT, or any MCP-compatible client — create as many forms as you want, and every submission lands in one dashboard.
 
-First, run the development server:
+## How it's put together
+
+- **`/` (this repo)** — Next.js app: the dashboard (forms, submissions/analytics, connectors, docs, team settings), the hosted public form pages (`/f/[slug]`), and the REST API (`/api/v1/*` + `/api/public/*`) everything else talks to.
+- **`/api/mcp/[token]`** (Pages Router) — a stateless, hosted **remote MCP server** over Streamable HTTP. Paste `https://<domain>/api/mcp/<token>` into any MCP client — no local install, no OAuth dance.
+- **`mcp-server/`** — an alternative stdio MCP server for running locally, wrapping the same REST API. Kept for power users; the hosted URL above is the primary path.
+- **`public/openapi.json`** — the REST API as an OpenAPI 3.1 schema, for ChatGPT Custom GPT Actions.
+
+One backend, driven by the dashboard, the hosted MCP endpoint, the stdio MCP server, or the OpenAPI action — all authenticated the same way.
+
+### Data model
+
+Multi-tenant: `User` ⟷ `Membership` ⟷ `Workspace`. Each `Form` and `ApiKey` belongs to a `Workspace`, not a user directly — so a team can share forms and a connector token. Registration auto-creates a personal workspace; `Invite` rows (with a one-time token link) add teammates. Forms carry `fields` (JSON), a `gdprText` privacy notice rendered under the submit button, success/redirect settings, and roll up into `Submission` rows.
+
+Currently running on **SQLite via Prisma** for local development (zero setup — no Docker, no external DB). The schema is written to be a straight swap to Postgres later: change `provider = "sqlite"` to `"postgresql"` in `prisma/schema.prisma`, point `DATABASE_URL` at a Postgres connection string, and re-run `npx prisma migrate deploy`. Note: SQLite doesn't survive on serverless hosts like Vercel (ephemeral filesystem) — a real Postgres database is required before deploying.
+
+## Local development
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+npx prisma migrate dev   # creates dev.db
+npm run dev               # http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Visit `/register` to create an account (auto-creates your workspace), then `/dashboard` to create your first form via the step-by-step wizard. Every form gets a public URL at `/f/<slug>`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Connecting an agent
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Go to **Connectors** in the dashboard and generate a token — this gives you a ready-to-paste server URL:
 
-## Learn More
+```
+https://<domain>/api/mcp/<token>
+```
 
-To learn more about Next.js, take a look at the following resources:
+- **Claude Desktop**: Settings → Connectors → Add custom connector → paste the URL. No OAuth, no client ID/secret.
+- **Claude Code**: `claude mcp add --transport http agentforms <url>`
+- **ChatGPT**: import `<domain>/openapi.json` as a Custom GPT Action, authenticate with the raw token as a Bearer key.
+- **Other MCP clients** (Cursor, Windsurf, etc.): any client that supports remote MCP over Streamable HTTP works — just point it at the URL.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Six tools are exposed: `create_form`, `list_forms`, `get_form`, `update_form`, `delete_form`, `list_submissions`. Full walkthroughs live on the in-app **Docs** page.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Team & workspaces
 
-## Deploy on Vercel
+Owners can invite teammates from **Settings** — since there's no email service wired up, invites generate a one-time link you share yourself (shown once, same pattern as connector tokens). Invitees either log in (if they already have an account) or set a password to join. Owners can manage members and revoke invites; a workspace always keeps at least one owner.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Deploying
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- **App**: Vercel (a Vercel MCP connector is already available in this environment).
+- **Database**: needs a real Postgres instance before deploying — SQLite won't persist on Vercel's serverless filesystem. Any managed Postgres works (Supabase, Neon, etc.); switch the Prisma datasource and run `prisma migrate deploy`.
+- Update `APP_URL` / `NEXTAUTH_URL` (and the `servers` URL in `public/openapi.json`) to the production domain — public form links, connector URLs, and the OpenAPI schema are all generated from `APP_URL`.
+- Set a real `AUTH_SECRET` (32+ random bytes) in production; the one in `.env` is a dev placeholder.
+
+## Notes on spam protection
+
+Public submissions get a honeypot field (`_hp`) and a best-effort in-memory rate limit (10 submissions/min per IP per form). The rate limiter is per-process — fine for a single instance, not distributed-safe. Swap for a Redis-backed limiter if you scale to multiple instances.
