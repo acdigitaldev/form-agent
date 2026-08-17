@@ -15,14 +15,16 @@ One backend, driven by the dashboard, the hosted MCP endpoint, the stdio MCP ser
 
 Multi-tenant: `User` ⟷ `Membership` ⟷ `Workspace`. Each `Form` and `ApiKey` belongs to a `Workspace`, not a user directly — so a team can share forms and a connector token. Registration auto-creates a personal workspace; `Invite` rows (with a one-time token link) add teammates. Forms carry `fields` (JSON), a `gdprText` privacy notice rendered under the submit button, success/redirect settings, and roll up into `Submission` rows.
 
-Currently running on **SQLite via Prisma** for local development (zero setup — no Docker, no external DB). The schema is written to be a straight swap to Postgres later: change `provider = "sqlite"` to `"postgresql"` in `prisma/schema.prisma`, point `DATABASE_URL` at a Postgres connection string, and re-run `npx prisma migrate deploy`. Note: SQLite doesn't survive on serverless hosts like Vercel (ephemeral filesystem) — a real Postgres database is required before deploying.
+Runs on **Postgres via Prisma** (currently Neon in production). Migrations live in `prisma/migrations`; `npm run build` runs `prisma migrate deploy` automatically before `next build`, so pushing to `main` both migrates and deploys.
 
 ## Local development
 
 ```bash
 npm install
-npx prisma migrate dev   # creates dev.db
-npm run dev               # http://localhost:3000
+# set DATABASE_URL in .env to a real Postgres connection string
+# (e.g. the same Neon database used in production, or any local Postgres)
+npx prisma migrate deploy
+npm run dev               # http://localhost:3020
 ```
 
 Visit `/register` to create an account (auto-creates your workspace), then `/dashboard` to create your first form via the step-by-step wizard. Every form gets a public URL at `/f/<slug>`.
@@ -48,10 +50,10 @@ Owners can invite teammates from **Settings** — since there's no email service
 
 ## Deploying
 
-- **App**: Vercel (a Vercel MCP connector is already available in this environment).
-- **Database**: needs a real Postgres instance before deploying — SQLite won't persist on Vercel's serverless filesystem. Any managed Postgres works (Supabase, Neon, etc.); switch the Prisma datasource and run `prisma migrate deploy`.
-- Update `APP_URL` / `NEXTAUTH_URL` (and the `servers` URL in `public/openapi.json`) to the production domain — public form links, connector URLs, and the OpenAPI schema are all generated from `APP_URL`.
-- Set a real `AUTH_SECRET` (32+ random bytes) in production; the one in `.env` is a dev placeholder.
+- **App**: Vercel, deployed from this repo's `main` branch.
+- **Database**: Neon Postgres. `DATABASE_URL` is set in the Vercel project's environment variables (Production, Preview, and Development) — never committed to the repo.
+- `AUTH_SECRET` is also set as a Vercel environment variable, generated fresh for production (not the dev placeholder in `.env`).
+- `APP_URL` / `NEXTAUTH_URL` should match the production domain — public form links, connector URLs, and the OpenAPI schema are all generated from `APP_URL`.
 
 ## Notes on spam protection
 

@@ -5,7 +5,7 @@
     "description": "Create forms and read submissions/leads. Every form gets a hosted public URL that end-users fill out directly.",
     "version": "1.0.0"
   },
-  "servers": [{ "url": "http://localhost:3000" }],
+  "servers": [{ "url": "https://form-agent-growthwithalex.vercel.app" }],
   "security": [{ "bearerAuth": [] }],
   "paths": {
     "/api/v1/forms": {
