@@ -169,7 +169,8 @@
           "type": { "$ref": "#/components/schemas/FieldType" },
           "required": { "type": "boolean", "default": false },
           "placeholder": { "type": "string" },
-          "options": { "type": "array", "items": { "type": "string" }, "description": "Required for type=select" }
+          "options": { "type": "array", "items": { "type": "string" }, "description": "Required for type=select" },
+          "placeholderLabel": { "type": "boolean", "description": "Show the label inside the input as placeholder text instead of above it" }
         }
       },
       "CreateFormRequest": {

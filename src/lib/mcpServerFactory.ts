@@ -22,6 +22,10 @@ const fieldSchema = z.object({
   required: z.boolean().optional().default(false),
   placeholder: z.string().optional(),
   options: z.array(z.string()).optional().describe("Choices for type='select'"),
+  placeholderLabel: z
+    .boolean()
+    .optional()
+    .describe("Show the label inside the input as placeholder text instead of above it"),
 });
 
 function textResult(data: unknown) {

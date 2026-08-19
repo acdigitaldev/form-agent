@@ -20,6 +20,8 @@ export const formFieldSchema = z.object({
   required: z.boolean().default(false),
   placeholder: z.string().optional(),
   options: z.array(z.string()).optional(),
+  /** Show the label inside the input as placeholder text instead of above it. */
+  placeholderLabel: z.boolean().optional(),
 });
 
 export type FormField = z.infer<typeof formFieldSchema>;

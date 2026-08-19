@@ -14,7 +14,7 @@ const DEFAULT_GDPR_TEXT =
 
 function Stepper({ step }: { step: number }) {
   return (
-    <ol className="flex items-center gap-2 text-sm flex-wrap">
+    <ol className="flex items-center justify-center gap-2 text-sm flex-wrap">
       {STEPS.map((label, i) => (
         <li key={label} className="flex items-center gap-2">
           <span
