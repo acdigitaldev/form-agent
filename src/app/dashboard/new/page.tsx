@@ -5,9 +5,10 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { FormFieldsEditor, emptyField } from "../FormFieldsEditor";
 import { FormPreview } from "./FormPreview";
+import { FORM_TEMPLATES, type FormTemplate } from "@/lib/templates";
 import type { FormField } from "@/lib/formFields";
 
-const STEPS = ["Basics", "Fields", "GDPR & messaging", "Review"] as const;
+const STEPS = ["Template", "Basics", "Fields", "GDPR & messaging", "Review"] as const;
 
 const DEFAULT_GDPR_TEXT =
   "By submitting this form, you agree to let us store and process the information above to respond to your request.";
@@ -49,6 +50,7 @@ function Stepper({ step }: { step: number }) {
 export default function NewFormPage() {
   const router = useRouter();
   const [step, setStep] = useState(0);
+  const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(null);
 
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
@@ -67,13 +69,27 @@ export default function NewFormPage() {
 
   const cleanFields = fields.filter((f) => f.label.trim().length > 0);
 
+  function applyTemplate(template: FormTemplate) {
+    setSelectedTemplateId(template.id);
+    setName(template.name);
+    setFields(template.fields.map((f) => ({ ...f })));
+    if (template.ctaText) setCtaText(template.ctaText);
+    if (template.successMessage) setSuccessMessage(template.successMessage);
+    setStep(1);
+  }
+
+  function startFromScratch() {
+    setSelectedTemplateId("scratch");
+    setStep(1);
+  }
+
   function goNext() {
     setError(null);
-    if (step === 0 && !name.trim()) {
+    if (step === 1 && !name.trim()) {
       setError("Give the form a name to continue");
       return;
     }
-    if (step === 1 && cleanFields.length === 0) {
+    if (step === 2 && cleanFields.length === 0) {
       setError("Add at least one field to continue");
       return;
     }
@@ -129,132 +145,171 @@ export default function NewFormPage() {
 
       <Stepper step={step} />
 
-      <div className="grid lg:grid-cols-2 gap-10 items-start">
-        <div className="flex flex-col gap-8 max-w-xl">
-          {step === 0 && (
-            <div className="flex flex-col gap-6">
-              <label className="flex flex-col gap-1 text-sm">
-                Form name
-                <input
-                  type="text"
-                  autoFocus
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="e.g. Newsletter signup"
-                  className="rounded-md border border-black/15 dark:border-white/20 bg-transparent px-3 py-2 outline-none focus:border-black/40 dark:focus:border-white/40"
-                />
-              </label>
-              <label className="flex flex-col gap-1 text-sm">
-                Description
-                <textarea
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  rows={2}
-                  placeholder="Optional — shown under the form title"
-                  className="rounded-md border border-black/15 dark:border-white/20 bg-transparent px-3 py-2 outline-none focus:border-black/40 dark:focus:border-white/40"
-                />
-              </label>
-            </div>
-          )}
+      {step === 0 ? (
+        <div className="flex flex-col gap-6 max-w-3xl">
+          <p className="text-sm text-black/60 dark:text-white/60">
+            Start from a template with the right fields already filled in, or build from scratch.
+          </p>
+          <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4">
+            {FORM_TEMPLATES.map((t) => (
+              <button
+                key={t.id}
+                type="button"
+                onClick={() => applyTemplate(t)}
+                className="text-left rounded-lg border border-black/10 dark:border-white/10 p-4 hover:border-black/30 dark:hover:border-white/30 transition-colors flex flex-col gap-2"
+              >
+                <span className="text-2xl">{t.emoji}</span>
+                <span className="font-medium">{t.name}</span>
+                <span className="text-xs text-black/50 dark:text-white/50">{t.description}</span>
+                <span className="text-xs text-black/40 dark:text-white/40 mt-1">
+                  {t.fields.length} field{t.fields.length === 1 ? "" : "s"}
+                </span>
+              </button>
+            ))}
+            <button
+              type="button"
+              onClick={startFromScratch}
+              className="text-left rounded-lg border border-dashed border-black/20 dark:border-white/20 p-4 hover:border-black/40 dark:hover:border-white/40 transition-colors flex flex-col gap-2"
+            >
+              <span className="text-2xl">✏️</span>
+              <span className="font-medium">Start from scratch</span>
+              <span className="text-xs text-black/50 dark:text-white/50">Build your own from a blank form.</span>
+            </button>
+          </div>
+        </div>
+      ) : (
+        <div className="grid lg:grid-cols-2 gap-10 items-start">
+          <div className="flex flex-col gap-8 max-w-xl">
+            {selectedTemplateId && selectedTemplateId !== "scratch" && step === 1 && (
+              <p className="text-xs text-black/50 dark:text-white/50 -mb-4">
+                Using the {FORM_TEMPLATES.find((t) => t.id === selectedTemplateId)?.name} template — edit
+                anything below.
+              </p>
+            )}
 
-          {step === 1 && (
-            <div>
-              <p className="text-sm font-medium mb-3">Fields</p>
-              <FormFieldsEditor fields={fields} onChange={setFields} />
-            </div>
-          )}
+            {step === 1 && (
+              <div className="flex flex-col gap-6">
+                <label className="flex flex-col gap-1 text-sm">
+                  Form name
+                  <input
+                    type="text"
+                    autoFocus
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="e.g. Newsletter signup"
+                    className="rounded-md border border-black/15 dark:border-white/20 bg-transparent px-3 py-2 outline-none focus:border-black/40 dark:focus:border-white/40"
+                  />
+                </label>
+                <label className="flex flex-col gap-1 text-sm">
+                  Description
+                  <textarea
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    rows={2}
+                    placeholder="Optional — shown under the form title"
+                    className="rounded-md border border-black/15 dark:border-white/20 bg-transparent px-3 py-2 outline-none focus:border-black/40 dark:focus:border-white/40"
+                  />
+                </label>
+              </div>
+            )}
 
-          {step === 2 && (
-            <div className="flex flex-col gap-6">
-              <label className="flex flex-col gap-1 text-sm">
-                Submit button text
-                <input
-                  type="text"
-                  placeholder="Submit"
-                  value={ctaText}
-                  onChange={(e) => setCtaText(e.target.value)}
-                  className="rounded-md border border-black/15 dark:border-white/20 bg-transparent px-3 py-2 outline-none focus:border-black/40 dark:focus:border-white/40"
-                />
-              </label>
-              <label className="flex flex-col gap-1 text-sm">
-                Success message
-                <input
-                  type="text"
-                  placeholder="Thanks! Your submission was received."
-                  value={successMessage}
-                  onChange={(e) => setSuccessMessage(e.target.value)}
-                  className="rounded-md border border-black/15 dark:border-white/20 bg-transparent px-3 py-2 outline-none focus:border-black/40 dark:focus:border-white/40"
-                />
-              </label>
-              <label className="flex flex-col gap-1 text-sm">
-                Redirect URL
-                <input
-                  type="url"
-                  placeholder="Optional — redirect here instead of the success message"
-                  value={redirectUrl}
-                  onChange={(e) => setRedirectUrl(e.target.value)}
-                  className="rounded-md border border-black/15 dark:border-white/20 bg-transparent px-3 py-2 outline-none focus:border-black/40 dark:focus:border-white/40"
-                />
-              </label>
-              <label className="flex flex-col gap-1 text-sm">
-                GDPR / privacy notice
-                <textarea
-                  value={gdprText}
-                  onChange={(e) => setGdprText(e.target.value)}
-                  rows={2}
-                  placeholder="Shown as small print below the submit button"
-                  className="rounded-md border border-black/15 dark:border-white/20 bg-transparent px-3 py-2 outline-none focus:border-black/40 dark:focus:border-white/40"
-                />
-              </label>
-            </div>
-          )}
+            {step === 2 && (
+              <div>
+                <p className="text-sm font-medium mb-3">Fields</p>
+                <FormFieldsEditor fields={fields} onChange={setFields} />
+              </div>
+            )}
 
-          {step === 3 && (
-            <div className="flex flex-col gap-4">
-              <div className="rounded-lg border border-black/10 dark:border-white/10 p-5 flex flex-col gap-3">
-                <div>
-                  <p className="text-xs text-black/50 dark:text-white/50">Name</p>
-                  <p className="font-medium">{name}</p>
-                </div>
-                {description && (
+            {step === 3 && (
+              <div className="flex flex-col gap-6">
+                <label className="flex flex-col gap-1 text-sm">
+                  Submit button text
+                  <input
+                    type="text"
+                    placeholder="Submit"
+                    value={ctaText}
+                    onChange={(e) => setCtaText(e.target.value)}
+                    className="rounded-md border border-black/15 dark:border-white/20 bg-transparent px-3 py-2 outline-none focus:border-black/40 dark:focus:border-white/40"
+                  />
+                </label>
+                <label className="flex flex-col gap-1 text-sm">
+                  Success message
+                  <input
+                    type="text"
+                    placeholder="Thanks! Your submission was received."
+                    value={successMessage}
+                    onChange={(e) => setSuccessMessage(e.target.value)}
+                    className="rounded-md border border-black/15 dark:border-white/20 bg-transparent px-3 py-2 outline-none focus:border-black/40 dark:focus:border-white/40"
+                  />
+                </label>
+                <label className="flex flex-col gap-1 text-sm">
+                  Redirect URL
+                  <input
+                    type="url"
+                    placeholder="Optional — redirect here instead of the success message"
+                    value={redirectUrl}
+                    onChange={(e) => setRedirectUrl(e.target.value)}
+                    className="rounded-md border border-black/15 dark:border-white/20 bg-transparent px-3 py-2 outline-none focus:border-black/40 dark:focus:border-white/40"
+                  />
+                </label>
+                <label className="flex flex-col gap-1 text-sm">
+                  GDPR / privacy notice
+                  <textarea
+                    value={gdprText}
+                    onChange={(e) => setGdprText(e.target.value)}
+                    rows={2}
+                    placeholder="Shown as small print below the submit button"
+                    className="rounded-md border border-black/15 dark:border-white/20 bg-transparent px-3 py-2 outline-none focus:border-black/40 dark:focus:border-white/40"
+                  />
+                </label>
+              </div>
+            )}
+
+            {step === 4 && (
+              <div className="flex flex-col gap-4">
+                <div className="rounded-lg border border-black/10 dark:border-white/10 p-5 flex flex-col gap-3">
                   <div>
-                    <p className="text-xs text-black/50 dark:text-white/50">Description</p>
-                    <p>{description}</p>
+                    <p className="text-xs text-black/50 dark:text-white/50">Name</p>
+                    <p className="font-medium">{name}</p>
                   </div>
-                )}
-                <div>
-                  <p className="text-xs text-black/50 dark:text-white/50 mb-1">
-                    Fields ({cleanFields.length})
-                  </p>
-                  <ul className="text-sm flex flex-col gap-1">
-                    {cleanFields.map((f) => (
-                      <li key={f.id}>
-                        {f.label} — {f.type}
-                        {f.required ? " (required)" : ""}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-                <div>
-                  <p className="text-xs text-black/50 dark:text-white/50">Button text</p>
-                  <p className="text-sm">{ctaText || "Submit"}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-black/50 dark:text-white/50">Success message</p>
-                  <p className="text-sm">{redirectUrl ? `Redirects to ${redirectUrl}` : successMessage}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-black/50 dark:text-white/50">GDPR notice</p>
-                  <p className="text-sm">{gdprText || "None"}</p>
+                  {description && (
+                    <div>
+                      <p className="text-xs text-black/50 dark:text-white/50">Description</p>
+                      <p>{description}</p>
+                    </div>
+                  )}
+                  <div>
+                    <p className="text-xs text-black/50 dark:text-white/50 mb-1">
+                      Fields ({cleanFields.length})
+                    </p>
+                    <ul className="text-sm flex flex-col gap-1">
+                      {cleanFields.map((f) => (
+                        <li key={f.id}>
+                          {f.label} — {f.type}
+                          {f.required ? " (required)" : ""}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                  <div>
+                    <p className="text-xs text-black/50 dark:text-white/50">Button text</p>
+                    <p className="text-sm">{ctaText || "Submit"}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-black/50 dark:text-white/50">Success message</p>
+                    <p className="text-sm">{redirectUrl ? `Redirects to ${redirectUrl}` : successMessage}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-black/50 dark:text-white/50">GDPR notice</p>
+                    <p className="text-sm">{gdprText || "None"}</p>
+                  </div>
                 </div>
               </div>
-            </div>
-          )}
+            )}
 
-          {error && <p className="text-sm text-red-600">{error}</p>}
+            {error && <p className="text-sm text-red-600">{error}</p>}
 
-          <div className="flex items-center gap-3">
-            {step > 0 && (
+            <div className="flex items-center gap-3">
               <button
                 type="button"
                 onClick={goBack}
@@ -262,38 +317,38 @@ export default function NewFormPage() {
               >
                 Back
               </button>
-            )}
-            {step < STEPS.length - 1 ? (
-              <button
-                type="button"
-                onClick={goNext}
-                className="rounded-md bg-foreground text-background px-5 py-2.5 font-medium hover:opacity-90"
-              >
-                Continue
-              </button>
-            ) : (
-              <button
-                type="button"
-                onClick={handleCreate}
-                disabled={loading}
-                className="rounded-md bg-foreground text-background px-5 py-2.5 font-medium hover:opacity-90 disabled:opacity-50"
-              >
-                {loading ? "Creating…" : "Create form"}
-              </button>
-            )}
+              {step < STEPS.length - 1 ? (
+                <button
+                  type="button"
+                  onClick={goNext}
+                  className="rounded-md bg-foreground text-background px-5 py-2.5 font-medium hover:opacity-90"
+                >
+                  Continue
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={handleCreate}
+                  disabled={loading}
+                  className="rounded-md bg-foreground text-background px-5 py-2.5 font-medium hover:opacity-90 disabled:opacity-50"
+                >
+                  {loading ? "Creating…" : "Create form"}
+                </button>
+              )}
+            </div>
+          </div>
+
+          <div className="lg:sticky lg:top-10">
+            <FormPreview
+              name={name}
+              description={description}
+              fields={cleanFields}
+              gdprText={gdprText}
+              ctaText={ctaText}
+            />
           </div>
         </div>
-
-        <div className="lg:sticky lg:top-10">
-          <FormPreview
-            name={name}
-            description={description}
-            fields={cleanFields}
-            gdprText={gdprText}
-            ctaText={ctaText}
-          />
-        </div>
-      </div>
+      )}
     </div>
   );
 }

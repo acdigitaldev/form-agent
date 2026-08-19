@@ -12,6 +12,9 @@ export default async function Home() {
         <div className="mx-auto max-w-5xl px-6 py-4 flex items-center justify-between">
           <span className="font-semibold tracking-tight">AgentForms</span>
           <nav className="flex items-center gap-4 text-sm">
+            <Link href="/pricing" className="hover:underline">
+              Pricing
+            </Link>
             <Link href="/login" className="hover:underline">
               Log in
             </Link>
@@ -30,8 +33,9 @@ export default async function Home() {
           Forms &amp; lead capture, built for AI agents
         </h1>
         <p className="text-lg text-black/70 dark:text-white/70 max-w-2xl">
-          Connect once from Claude, ChatGPT, or any MCP client. Create as many forms as you want with
-          a single tool call, get a hosted link instantly, and watch leads land in one dashboard.
+          A simpler, more affordable alternative to form builders like Tally — with one-click templates and a
+          direct connection to Claude, ChatGPT, and any MCP client. Create as many forms as you want with a
+          single tool call, get a hosted link instantly, and watch leads land in one dashboard.
         </p>
         <div className="flex gap-3">
           <Link

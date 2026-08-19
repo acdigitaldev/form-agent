@@ -55,6 +55,52 @@ server.registerTool(
 );
 
 server.registerTool(
+  "list_templates",
+  {
+    title: "List form templates",
+    description:
+      "List the built-in form templates (newsletter, contact, demo request, survey, event RSVP, job application) with their ids and pre-filled fields. Use before create_form_from_template.",
+    inputSchema: {},
+  },
+  async () => {
+    try {
+      const result = await apiRequest("/api/v1/templates");
+      return textResult(result);
+    } catch (err) {
+      return errorResult(err);
+    }
+  }
+);
+
+server.registerTool(
+  "create_form_from_template",
+  {
+    title: "Create a form from a template",
+    description:
+      "Create a new form pre-filled from a built-in template in one call. Call list_templates first if you don't already know the template id.",
+    inputSchema: {
+      templateId: z.string(),
+      name: z.string().optional().describe("Override the template's default form name"),
+      extraFields: z
+        .array(fieldSchema)
+        .optional()
+        .describe("Additional custom fields to append after the template's fields"),
+    },
+  },
+  async (input) => {
+    try {
+      const result = await apiRequest("/api/v1/forms/from-template", {
+        method: "POST",
+        body: JSON.stringify(input),
+      });
+      return textResult(result);
+    } catch (err) {
+      return errorResult(err);
+    }
+  }
+);
+
+server.registerTool(
   "list_forms",
   {
     title: "List forms",

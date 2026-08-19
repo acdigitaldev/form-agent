@@ -1,7 +1,9 @@
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
 import { getUserMembership } from "@/lib/workspace";
+import { isPro } from "@/lib/plan";
 import { TeamManager } from "./TeamManager";
+import { PlanCard } from "./PlanCard";
 
 export default async function SettingsPage() {
   const session = await auth();
@@ -33,9 +35,12 @@ export default async function SettingsPage() {
         </p>
       </div>
 
+      <PlanCard plan={workspace?.plan === "pro" ? "pro" : "free"} canManage={membership.role === "owner"} />
+
       <TeamManager
         currentUserId={userId}
         canManage={membership.role === "owner"}
+        isPro={isPro(workspace)}
         initialMembers={memberships.map((m) => ({
           membershipId: m.id,
           userId: m.userId,

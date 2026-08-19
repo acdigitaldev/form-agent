@@ -2,10 +2,12 @@ import Link from "next/link";
 
 const ARTICLES = [
   { id: "getting-started", title: "Getting started" },
+  { id: "templates", title: "Templates" },
   { id: "connecting-agents", title: "Connecting an agent" },
   { id: "field-types", title: "Field types" },
   { id: "gdpr", title: "GDPR & privacy notices" },
   { id: "embedding", title: "Embedding a form" },
+  { id: "plans", title: "Plans & billing" },
   { id: "api-reference", title: "API reference" },
   { id: "faq", title: "FAQ" },
 ];
@@ -47,6 +49,20 @@ export default function DocsPage() {
           </P>
         </Article>
 
+        <Article id="templates" title="Templates">
+          <P>
+            Step 1 of the form wizard offers one-click templates — newsletter signup, contact form, demo
+            request, customer survey, event RSVP, and job application — each pre-filled with sensible
+            fields, a matching submit button label, and success message. Pick one, tweak anything, done.
+            &quot;Start from scratch&quot; skips straight to a blank form.
+          </P>
+          <P>
+            Agents get the same shortcut: <code>list_templates</code> returns the available templates, and{" "}
+            <code>create_form_from_template</code> creates one in a single call — optionally with a custom
+            name or extra fields appended on top of the template&apos;s defaults.
+          </P>
+        </Article>
+
         <Article id="connecting-agents" title="Connecting an agent">
           <P>
             Go to <Link href="/dashboard/connectors" className="underline">Connectors</Link> and generate a
@@ -62,9 +78,10 @@ export default function DocsPage() {
             instructions for each client live on the Connectors page itself.
           </P>
           <P>
-            Once connected, the agent has six tools available: <code>create_form</code>,{" "}
+            Once connected, the agent has eight tools available: <code>create_form</code>,{" "}
             <code>list_forms</code>, <code>get_form</code>, <code>update_form</code>,{" "}
-            <code>delete_form</code>, and <code>list_submissions</code>.
+            <code>delete_form</code>, <code>list_submissions</code>, <code>list_templates</code>, and{" "}
+            <code>create_form_from_template</code>.
           </P>
         </Article>
 
@@ -100,6 +117,16 @@ export default function DocsPage() {
           </P>
         </Article>
 
+        <Article id="plans" title="Plans & billing">
+          <P>
+            Free covers unlimited forms, submissions, fields, and full MCP/API access — the only thing it
+            adds is a small &quot;Powered by AgentForms&quot; badge on public form pages. <strong>Pro</strong>{" "}
+            removes that badge and unlocks inviting teammates into your workspace. See{" "}
+            <Link href="/pricing" className="underline">Pricing</Link> for the current rate, or manage your
+            plan from <Link href="/dashboard/settings" className="underline">Settings</Link>.
+          </P>
+        </Article>
+
         <Article id="api-reference" title="API reference">
           <P>
             The full REST API — the same one the MCP connector and dashboard both use — is documented as
@@ -110,7 +137,7 @@ export default function DocsPage() {
 
         <Article id="faq" title="FAQ">
           <P>
-            <strong>Can I have a team?</strong> Yes — invite people from{" "}
+            <strong>Can I have a team?</strong> Yes, on Pro — invite people from{" "}
             <Link href="/dashboard/settings" className="underline">Settings</Link>. Owners can invite,
             remove members, and manage tokens; members can create and edit forms.
           </P>

@@ -10,11 +10,13 @@ export function TeamManager({
   initialInvites,
   currentUserId,
   canManage,
+  isPro,
 }: {
   initialMembers: Member[];
   initialInvites: PendingInvite[];
   currentUserId: string;
   canManage: boolean;
+  isPro: boolean;
 }) {
   const [members, setMembers] = useState(initialMembers);
   const [invites, setInvites] = useState(initialInvites);
@@ -101,7 +103,17 @@ export function TeamManager({
         </table>
       </section>
 
-      {canManage && (
+      {canManage && !isPro && (
+        <section className="rounded-lg border border-black/10 dark:border-white/10 p-5 flex flex-col gap-2">
+          <h2 className="font-medium">Invite someone</h2>
+          <p className="text-sm text-black/60 dark:text-white/60">
+            Inviting teammates is a Pro feature. Upgrade from the Plan section above to add people to this
+            workspace.
+          </p>
+        </section>
+      )}
+
+      {canManage && isPro && (
         <section className="flex flex-col gap-4">
           <h2 className="font-medium">Invite someone</h2>
 

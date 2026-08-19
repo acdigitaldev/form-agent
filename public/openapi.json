@@ -84,6 +84,41 @@
         }
       }
     },
+    "/api/v1/templates": {
+      "get": {
+        "operationId": "listTemplates",
+        "summary": "List built-in form templates (newsletter, contact, demo request, survey, event RSVP, job application)",
+        "responses": { "200": { "description": "OK" } }
+      }
+    },
+    "/api/v1/forms/from-template": {
+      "post": {
+        "operationId": "createFormFromTemplate",
+        "summary": "Create a new form pre-filled from a built-in template",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["templateId"],
+                "properties": {
+                  "templateId": { "type": "string", "description": "Id from GET /api/v1/templates" },
+                  "name": { "type": "string", "description": "Override the template's default name" },
+                  "extraFields": { "type": "array", "items": { "$ref": "#/components/schemas/FormField" } }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/FormResponse" } } }
+          }
+        }
+      }
+    },
     "/api/v1/submissions": {
       "get": {
         "operationId": "listAllSubmissions",

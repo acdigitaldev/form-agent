@@ -42,11 +42,31 @@ https://<domain>/api/mcp/<token>
 - **ChatGPT**: import `<domain>/openapi.json` as a Custom GPT Action, authenticate with the raw token as a Bearer key.
 - **Other MCP clients** (Cursor, Windsurf, etc.): any client that supports remote MCP over Streamable HTTP works — just point it at the URL.
 
-Six tools are exposed: `create_form`, `list_forms`, `get_form`, `update_form`, `delete_form`, `list_submissions`. Full walkthroughs live on the in-app **Docs** page.
+Eight tools are exposed: `create_form`, `list_forms`, `get_form`, `update_form`, `delete_form`,
+`list_submissions`, `list_templates`, `create_form_from_template`. Full walkthroughs live on the in-app
+**Docs** page.
+
+## Templates
+
+Six built-in templates (`src/lib/templates.ts`) — newsletter signup, contact form, demo request, customer
+survey, event RSVP, job application — pre-fill name, fields, CTA text, and success message in one click,
+in the dashboard wizard's first step or via the `create_form_from_template` tool/`/api/v1/forms/from-template`
+endpoint.
+
+## Plans & billing
+
+Free vs Pro, gated in `src/lib/plan.ts` (`PLAN_FEATURES`, pricing constants). Free is unlimited on
+forms/submissions/fields — the only gates are a "Powered by AgentForms" badge on public forms and team
+invites, both Pro-only. **No real billing yet**: upgrading in Settings (`PlanCard`) flips
+`Workspace.plan` directly via `PATCH /api/v1/workspace` — no Stripe/payment collection. A Stripe MCP
+connector is available in this environment when it's time to wire up real checkout.
 
 ## Team & workspaces
 
-Owners can invite teammates from **Settings** — since there's no email service wired up, invites generate a one-time link you share yourself (shown once, same pattern as connector tokens). Invitees either log in (if they already have an account) or set a password to join. Owners can manage members and revoke invites; a workspace always keeps at least one owner.
+Owners can invite teammates from **Settings** (Pro only) — since there's no email service wired up,
+invites generate a one-time link you share yourself (shown once, same pattern as connector tokens).
+Invitees either log in (if they already have an account) or set a password to join. Owners can manage
+members and revoke invites; a workspace always keeps at least one owner.
 
 ## Deploying
 

@@ -17,9 +17,11 @@ model User {
 }
 
 model Workspace {
-  id        String   @id @default(cuid())
-  name      String
-  createdAt DateTime @default(now())
+  id              String   @id @default(cuid())
+  name            String
+  plan            String   @default("free") // "free" | "pro"
+  billingInterval String? // "monthly" | "yearly" — cosmetic until real billing lands
+  createdAt       DateTime @default(now())
 
   memberships Membership[]
   invites     Invite[]

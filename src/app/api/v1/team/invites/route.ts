@@ -4,6 +4,7 @@ import { nanoid } from "nanoid";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
 import { getUserMembership } from "@/lib/workspace";
+import { isPro } from "@/lib/plan";
 
 const inviteSchema = z.object({
   email: z.string().email(),
@@ -19,6 +20,14 @@ export async function POST(req: NextRequest) {
   if (!membership) return NextResponse.json({ error: "No workspace" }, { status: 404 });
   if (membership.role !== "owner") {
     return NextResponse.json({ error: "Only workspace owners can invite people" }, { status: 403 });
+  }
+
+  const workspace = await prisma.workspace.findUnique({ where: { id: membership.workspaceId } });
+  if (!isPro(workspace)) {
+    return NextResponse.json(
+      { error: "Inviting teammates is a Pro feature. Upgrade from Settings to add people.", requiresPro: true },
+      { status: 402 }
+    );
   }
 
   const body = await req.json().catch(() => null);

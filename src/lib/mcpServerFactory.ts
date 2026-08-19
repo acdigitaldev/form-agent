@@ -8,6 +8,7 @@ import {
   deleteForm,
   listSubmissionsForForm,
 } from "@/lib/formsService";
+import { FORM_TEMPLATES, getTemplate } from "@/lib/templates";
 
 const fieldTypeSchema = z
   .enum(["text", "email", "phone", "textarea", "select", "checkbox", "number", "url"])
@@ -53,6 +54,58 @@ export function buildMcpServerForWorkspace(workspaceId: string) {
     async (input) => {
       try {
         return textResult({ form: await createForm(workspaceId, input) });
+      } catch (err) {
+        return errorResult(String(err));
+      }
+    }
+  );
+
+  server.registerTool(
+    "list_templates",
+    {
+      title: "List form templates",
+      description:
+        "List the built-in form templates (newsletter, contact, demo request, survey, event RSVP, job application) with their ids and pre-filled fields. Use before create_form_from_template.",
+      inputSchema: {},
+    },
+    async () =>
+      textResult({
+        templates: FORM_TEMPLATES.map((t) => ({
+          id: t.id,
+          name: t.name,
+          description: t.description,
+          fields: t.fields,
+        })),
+      })
+  );
+
+  server.registerTool(
+    "create_form_from_template",
+    {
+      title: "Create a form from a template",
+      description:
+        "Create a new form pre-filled from a built-in template in one call — the fastest way to spin up a newsletter signup, contact form, demo request, survey, event RSVP, or job application. Call list_templates first if you don't already know the template id.",
+      inputSchema: {
+        templateId: z.enum(FORM_TEMPLATES.map((t) => t.id) as [string, ...string[]]),
+        name: z.string().optional().describe("Override the template's default form name"),
+        extraFields: z
+          .array(fieldSchema)
+          .optional()
+          .describe("Additional custom fields to append after the template's fields"),
+      },
+    },
+    async ({ templateId, name, extraFields }) => {
+      const template = getTemplate(templateId);
+      if (!template) return errorResult(`Unknown template id: ${templateId}`);
+
+      try {
+        const form = await createForm(workspaceId, {
+          name: name ?? template.name,
+          fields: [...template.fields, ...(extraFields ?? [])],
+          ctaText: template.ctaText,
+          successMessage: template.successMessage,
+        });
+        return textResult({ form });
       } catch (err) {
         return errorResult(String(err));
       }
