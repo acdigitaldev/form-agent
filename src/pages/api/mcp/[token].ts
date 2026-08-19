@@ -24,7 +24,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return;
   }
 
-  const server = buildMcpServerForWorkspace(workspace.id);
+  const server = buildMcpServerForWorkspace(workspace);
   const transport = new StreamableHTTPServerTransport({ sessionIdGenerator: undefined });
 
   res.on("close", () => {

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { FormFieldsEditor } from "../../FormFieldsEditor";
 import type { FormField } from "@/lib/formFields";
 
@@ -15,6 +16,8 @@ export function FormSettingsEditor({
   initialRedirectUrl,
   initialGdprText,
   initialCtaText,
+  initialWebhookUrl,
+  isPro,
 }: {
   formId: string;
   initialName: string;
@@ -25,6 +28,8 @@ export function FormSettingsEditor({
   initialRedirectUrl: string;
   initialGdprText: string;
   initialCtaText: string;
+  initialWebhookUrl: string;
+  isPro: boolean;
 }) {
   const router = useRouter();
   const [name, setName] = useState(initialName);
@@ -35,6 +40,7 @@ export function FormSettingsEditor({
   const [redirectUrl, setRedirectUrl] = useState(initialRedirectUrl);
   const [gdprText, setGdprText] = useState(initialGdprText);
   const [ctaText, setCtaText] = useState(initialCtaText);
+  const [webhookUrl, setWebhookUrl] = useState(initialWebhookUrl);
   const [status, setStatus] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -56,6 +62,7 @@ export function FormSettingsEditor({
         redirectUrl: redirectUrl || null,
         gdprText,
         ctaText: ctaText || "Submit",
+        ...(isPro ? { webhookUrl: webhookUrl || null } : {}),
       }),
     });
 
@@ -152,6 +159,30 @@ export function FormSettingsEditor({
           className="rounded-md border border-black/15 dark:border-white/20 bg-transparent px-3 py-2 outline-none focus:border-black/40 dark:focus:border-white/40"
         />
       </label>
+
+      {isPro ? (
+        <label className="flex flex-col gap-1 text-sm">
+          Webhook URL
+          <input
+            type="url"
+            placeholder="https://your-app.com/webhooks/agentforms"
+            value={webhookUrl}
+            onChange={(e) => setWebhookUrl(e.target.value)}
+            className="rounded-md border border-black/15 dark:border-white/20 bg-transparent px-3 py-2 outline-none focus:border-black/40 dark:focus:border-white/40"
+          />
+          <span className="text-xs text-black/50 dark:text-white/50">
+            We&apos;ll POST a JSON payload here on every new submission.
+          </span>
+        </label>
+      ) : (
+        <div className="rounded-md border border-dashed border-black/15 dark:border-white/20 px-3 py-3 text-sm text-black/50 dark:text-white/50">
+          Webhooks (POST every submission to your own endpoint) are a{" "}
+          <Link href="/dashboard/settings" className="underline">
+            Pro
+          </Link>{" "}
+          feature.
+        </div>
+      )}
 
       <label className="flex items-center gap-2 text-sm">
         <input type="checkbox" checked={isActive} onChange={(e) => setIsActive(e.target.checked)} />

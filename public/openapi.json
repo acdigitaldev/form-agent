@@ -130,6 +130,19 @@
         "responses": { "200": { "description": "OK" } }
       }
     },
+    "/api/v1/submissions/export": {
+      "get": {
+        "operationId": "exportSubmissions",
+        "summary": "Pro only — download submissions as CSV, optionally filtered to one form",
+        "parameters": [
+          { "name": "formId", "in": "query", "required": false, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "CSV file", "content": { "text/csv": { "schema": { "type": "string" } } } },
+          "402": { "description": "Requires Pro plan" }
+        }
+      }
+    },
     "/api/v1/analytics": {
       "get": {
         "operationId": "getAnalytics",
@@ -169,7 +182,8 @@
           "successMessage": { "type": "string" },
           "redirectUrl": { "type": "string", "format": "uri" },
           "gdprText": { "type": "string", "description": "Privacy/consent notice shown below the submit button" },
-          "ctaText": { "type": "string", "description": "Submit button label, defaults to 'Submit'" }
+          "ctaText": { "type": "string", "description": "Submit button label, defaults to 'Submit'" },
+          "webhookUrl": { "type": "string", "format": "uri", "description": "Pro only — POSTed on every submission" }
         }
       },
       "UpdateFormRequest": {
@@ -182,6 +196,7 @@
           "redirectUrl": { "type": "string", "nullable": true },
           "gdprText": { "type": "string" },
           "ctaText": { "type": "string" },
+          "webhookUrl": { "type": "string", "nullable": true, "description": "Pro only — POSTed on every submission" },
           "isActive": { "type": "boolean" }
         }
       },
@@ -195,6 +210,7 @@
           "fields": { "type": "array", "items": { "$ref": "#/components/schemas/FormField" } },
           "gdprText": { "type": "string" },
           "ctaText": { "type": "string" },
+          "webhookUrl": { "type": "string", "nullable": true },
           "successMessage": { "type": "string" },
           "redirectUrl": { "type": "string", "nullable": true },
           "isActive": { "type": "boolean" },

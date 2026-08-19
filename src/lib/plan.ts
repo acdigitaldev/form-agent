@@ -9,19 +9,60 @@ export function isPro(workspace: { plan: string } | null | undefined): boolean {
   return workspace?.plan === "pro";
 }
 
-export const PLAN_FEATURES = {
+export type PlanFeature = { title: string; description: string; comingSoon?: boolean };
+
+export const PLAN_FEATURES: { free: PlanFeature[]; pro: PlanFeature[] } = {
   free: [
-    "Unlimited forms",
-    "Unlimited submissions & fields",
-    "Hosted MCP connector for any agent",
-    "GDPR notice & custom CTA per form",
-    "Submissions dashboard & analytics",
-    "“Powered by AgentForms” badge on public forms",
+    {
+      title: "Unlimited forms & submissions",
+      description: "No caps on forms, responses, or fields — ever. Build as much as you need.",
+    },
+    {
+      title: "One-click templates",
+      description: "Newsletter, contact form, demo request, survey, event RSVP, job application — pre-filled.",
+    },
+    {
+      title: "Hosted MCP connector",
+      description: "Paste one URL into Claude, ChatGPT, or any MCP client. No local install, no OAuth dance.",
+    },
+    {
+      title: "GDPR notice & custom CTA",
+      description: "Editable privacy notice and submit-button text on every form, out of the box.",
+    },
+    {
+      title: "Submissions dashboard",
+      description: "30-day analytics, per-form filtering, and a live feed of every lead you capture.",
+    },
+    {
+      title: "REST API & OpenAPI schema",
+      description: "The same API the dashboard and MCP connector use — build your own integrations on it.",
+    },
   ],
   pro: [
-    "Everything in Free",
-    "Remove “Powered by AgentForms” branding",
-    "Invite team members to your workspace",
-    "Priority template library",
+    {
+      title: "Remove AgentForms branding",
+      description: "No “Powered by AgentForms” badge on public forms — fully white-label for your audience.",
+    },
+    {
+      title: "Team workspaces",
+      description: "Invite unlimited teammates with owner/member roles, sharing every form and connector token.",
+    },
+    {
+      title: "CSV export",
+      description: "Download every submission for a form — or your whole workspace — in one click.",
+    },
+    {
+      title: "Webhooks",
+      description: "POST every new submission to your own endpoint or automation tool the instant it lands.",
+    },
+    {
+      title: "Priority template requests",
+      description: "Ask for a template you need for your workflow and we'll add it to the library.",
+    },
+    {
+      title: "Custom domains & CSS",
+      description: "Serve forms on your own domain with your own styling.",
+      comingSoon: true,
+    },
   ],
-} as const;
+};

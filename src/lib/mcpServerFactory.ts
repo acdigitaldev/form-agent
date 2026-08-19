@@ -9,6 +9,7 @@ import {
   listSubmissionsForForm,
 } from "@/lib/formsService";
 import { FORM_TEMPLATES, getTemplate } from "@/lib/templates";
+import { isPro } from "@/lib/plan";
 
 const fieldTypeSchema = z
   .enum(["text", "email", "phone", "textarea", "select", "checkbox", "number", "url"])
@@ -31,8 +32,11 @@ function errorResult(message: string) {
   return { content: [{ type: "text" as const, text: `Error: ${message}` }], isError: true };
 }
 
+const PRO_REQUIRED = "Webhooks are a Pro feature. Upgrade from Settings to use them.";
+
 /** Builds a fresh MCP server scoped to one workspace. Cheap — safe to build per-request. */
-export function buildMcpServerForWorkspace(workspaceId: string) {
+export function buildMcpServerForWorkspace(workspace: { id: string; plan: string }) {
+  const workspaceId = workspace.id;
   const server = new McpServer({ name: "agentforms", version: "1.0.0" });
 
   server.registerTool(
@@ -49,9 +53,11 @@ export function buildMcpServerForWorkspace(workspaceId: string) {
         redirectUrl: z.string().url().optional(),
         gdprText: z.string().optional().describe("Privacy/consent notice shown below the submit button"),
         ctaText: z.string().optional().describe("Submit button label, defaults to 'Submit'"),
+        webhookUrl: z.string().url().optional().describe("Pro only — POSTed on every submission"),
       },
     },
     async (input) => {
+      if (input.webhookUrl && !isPro(workspace)) return errorResult(PRO_REQUIRED);
       try {
         return textResult({ form: await createForm(workspaceId, input) });
       } catch (err) {
@@ -150,10 +156,12 @@ export function buildMcpServerForWorkspace(workspaceId: string) {
         redirectUrl: z.string().url().nullable().optional(),
         gdprText: z.string().optional(),
         ctaText: z.string().optional(),
+        webhookUrl: z.string().url().nullable().optional().describe("Pro only — POSTed on every submission"),
         isActive: z.boolean().optional().describe("Set false to pause the form"),
       },
     },
     async ({ formId, ...patch }) => {
+      if (patch.webhookUrl && !isPro(workspace)) return errorResult(PRO_REQUIRED);
       const form = await updateForm(workspaceId, formId, patch);
       return form ? textResult({ form }) : errorResult("Form not found");
     }

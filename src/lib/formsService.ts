@@ -11,6 +11,7 @@ export const createFormInput = z.object({
   redirectUrl: z.string().url().optional(),
   gdprText: z.string().max(1000).optional(),
   ctaText: z.string().min(1).max(40).optional(),
+  webhookUrl: z.string().url().optional(),
 });
 export type CreateFormInput = z.infer<typeof createFormInput>;
 
@@ -22,6 +23,7 @@ export const updateFormInput = z.object({
   redirectUrl: z.string().url().nullable().optional(),
   gdprText: z.string().max(1000).optional(),
   ctaText: z.string().min(1).max(40).optional(),
+  webhookUrl: z.string().url().nullable().optional(),
   isActive: z.boolean().optional(),
 });
 export type UpdateFormInput = z.infer<typeof updateFormInput>;
@@ -59,6 +61,7 @@ export async function createForm(workspaceId: string, input: CreateFormInput) {
       redirectUrl: input.redirectUrl,
       ...(input.gdprText !== undefined ? { gdprText: input.gdprText } : {}),
       ...(input.ctaText !== undefined ? { ctaText: input.ctaText } : {}),
+      ...(input.webhookUrl !== undefined ? { webhookUrl: input.webhookUrl } : {}),
     },
     include: { _count: { select: { submissions: true } } },
   });
@@ -87,6 +90,7 @@ export async function updateForm(workspaceId: string, formId: string, patch: Upd
       ...(patch.redirectUrl !== undefined ? { redirectUrl: patch.redirectUrl } : {}),
       ...(patch.gdprText !== undefined ? { gdprText: patch.gdprText } : {}),
       ...(patch.ctaText !== undefined ? { ctaText: patch.ctaText } : {}),
+      ...(patch.webhookUrl !== undefined ? { webhookUrl: patch.webhookUrl } : {}),
       ...(patch.isActive !== undefined ? { isActive: patch.isActive } : {}),
     },
     include: { _count: { select: { submissions: true } } },

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { resolveWorkspace } from "@/lib/requestAuth";
 import { getForm, updateForm, deleteForm, updateFormInput } from "@/lib/formsService";
+import { isPro } from "@/lib/plan";
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const workspace = await resolveWorkspace(req);
@@ -22,6 +23,12 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   const parsed = updateFormInput.safeParse(body);
   if (!parsed.success) {
     return NextResponse.json({ error: "Invalid form payload", details: parsed.error.flatten() }, { status: 400 });
+  }
+  if (parsed.data.webhookUrl && !isPro(workspace)) {
+    return NextResponse.json(
+      { error: "Webhooks are a Pro feature. Upgrade from Settings to use them.", requiresPro: true },
+      { status: 402 }
+    );
   }
 
   const form = await updateForm(workspace.id, id, parsed.data);

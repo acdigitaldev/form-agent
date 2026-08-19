@@ -42,6 +42,7 @@ server.registerTool(
       redirectUrl: z.string().url().optional().describe("If set, redirect here instead of showing successMessage"),
       gdprText: z.string().optional().describe("Privacy/consent notice shown below the submit button"),
       ctaText: z.string().optional().describe("Submit button label, defaults to 'Submit'"),
+      webhookUrl: z.string().url().optional().describe("Pro only — POSTed on every submission"),
     },
   },
   async (input) => {
@@ -149,6 +150,7 @@ server.registerTool(
       redirectUrl: z.string().url().nullable().optional(),
       gdprText: z.string().optional(),
       ctaText: z.string().optional(),
+      webhookUrl: z.string().url().nullable().optional().describe("Pro only — POSTed on every submission"),
       isActive: z.boolean().optional().describe("Set false to pause the form and stop accepting submissions"),
     },
   },

@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { auth } from "@/auth";
 import { getUserWorkspace } from "@/lib/workspace";
 import { getForm } from "@/lib/formsService";
+import { isPro } from "@/lib/plan";
 import { CopyButton } from "./CopyButton";
 import { FormSettingsEditor } from "./FormSettingsEditor";
 
@@ -77,6 +78,8 @@ export default async function FormDetailPage({ params }: { params: Promise<{ id:
           initialRedirectUrl={form.redirectUrl ?? ""}
           initialGdprText={form.gdprText}
           initialCtaText={form.ctaText}
+          initialWebhookUrl={form.webhookUrl ?? ""}
+          isPro={isPro(workspace)}
         />
       </section>
     </div>

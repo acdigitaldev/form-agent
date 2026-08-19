@@ -120,10 +120,10 @@ export default function DocsPage() {
         <Article id="plans" title="Plans & billing">
           <P>
             Free covers unlimited forms, submissions, fields, and full MCP/API access — the only thing it
-            adds is a small &quot;Powered by AgentForms&quot; badge on public form pages. <strong>Pro</strong>{" "}
-            removes that badge and unlocks inviting teammates into your workspace. See{" "}
-            <Link href="/pricing" className="underline">Pricing</Link> for the current rate, or manage your
-            plan from <Link href="/dashboard/settings" className="underline">Settings</Link>.
+            adds is a small &quot;Powered by AgentForms&quot; badge on public form pages.{" "}
+            <strong>Pro</strong> removes that badge and adds CSV export, submission webhooks, and team
+            invites. Manage your plan from{" "}
+            <Link href="/dashboard/settings" className="underline">Settings</Link>.
           </P>
         </Article>
 

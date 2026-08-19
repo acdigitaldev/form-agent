@@ -10,6 +10,7 @@ type FormRecord = {
   ctaText: string;
   successMessage: string;
   redirectUrl: string | null;
+  webhookUrl: string | null;
   isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
@@ -27,6 +28,7 @@ export function serializeForm(form: FormRecord) {
     ctaText: form.ctaText,
     successMessage: form.successMessage,
     redirectUrl: form.redirectUrl,
+    webhookUrl: form.webhookUrl,
     isActive: form.isActive,
     createdAt: form.createdAt,
     updatedAt: form.updatedAt,

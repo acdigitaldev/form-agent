@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { parseFields } from "@/lib/formFields";
 import { isRateLimited } from "@/lib/rateLimit";
+import { isPro } from "@/lib/plan";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const HONEYPOT_KEY = "_hp";
@@ -19,7 +20,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ slu
     return NextResponse.json({ error: "Too many submissions, please try again shortly" }, { status: 429 });
   }
 
-  const form = await prisma.form.findUnique({ where: { slug } });
+  const form = await prisma.form.findUnique({ where: { slug }, include: { workspace: true } });
   if (!form || !form.isActive) {
     return NextResponse.json({ error: "Form not found" }, { status: 404 });
   }
@@ -64,7 +65,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ slu
     return NextResponse.json({ error: "Validation failed", fieldErrors: errors }, { status: 422 });
   }
 
-  await prisma.submission.create({
+  const submission = await prisma.submission.create({
     data: {
       formId: form.id,
       data: JSON.stringify(data),
@@ -73,5 +74,34 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ slu
     },
   });
 
+  if (form.webhookUrl && isPro(form.workspace)) {
+    // Awaited (bounded to 4s) rather than fire-and-forget — serverless functions
+    // aren't guaranteed to keep running background work after the response is sent.
+    await fireWebhook(form.webhookUrl, {
+      formId: form.id,
+      formName: form.name,
+      submissionId: submission.id,
+      submittedAt: submission.createdAt.toISOString(),
+      data,
+    });
+  }
+
   return NextResponse.json({ ok: true, message: form.successMessage, redirectUrl: form.redirectUrl });
+}
+
+/** Best-effort, bounded-time POST — a slow/broken webhook must never block or fail the submission. */
+async function fireWebhook(url: string, payload: unknown) {
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 4000);
+    await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+      signal: controller.signal,
+    });
+    clearTimeout(timeout);
+  } catch {
+    // swallow — webhook delivery is best-effort
+  }
 }

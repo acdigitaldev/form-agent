@@ -1,6 +1,8 @@
+import Link from "next/link";
 import { auth } from "@/auth";
 import { getUserWorkspace } from "@/lib/workspace";
 import { listForms, listAllSubmissions, getAnalyticsSummary } from "@/lib/formsService";
+import { isPro } from "@/lib/plan";
 import { SubmissionsFilter } from "./SubmissionsFilter";
 
 function StatTile({ label, value }: { label: string; value: number | string }) {
@@ -86,7 +88,25 @@ export default async function SubmissionsPage({
           <h2 className="font-medium">
             All submissions <span className="text-black/40 dark:text-white/40">({submissionsResult.total})</span>
           </h2>
-          <SubmissionsFilter forms={forms.map((f) => ({ id: f.id, name: f.name }))} selectedFormId={formId} />
+          <div className="flex items-center gap-3">
+            {isPro(workspace) ? (
+              <a
+                href={`/api/v1/submissions/export${formId ? `?formId=${formId}` : ""}`}
+                className="text-sm rounded-md border border-black/15 dark:border-white/20 px-3 py-1.5 hover:bg-black/5 dark:hover:bg-white/10"
+              >
+                Export CSV
+              </a>
+            ) : (
+              <Link
+                href="/dashboard/settings"
+                title="CSV export is a Pro feature"
+                className="text-sm rounded-md border border-dashed border-black/15 dark:border-white/20 px-3 py-1.5 text-black/40 dark:text-white/40 hover:bg-black/5 dark:hover:bg-white/10"
+              >
+                Export CSV (Pro)
+              </Link>
+            )}
+            <SubmissionsFilter forms={forms.map((f) => ({ id: f.id, name: f.name }))} selectedFormId={formId} />
+          </div>
         </div>
 
         {submissionsResult.submissions.length === 0 ? (

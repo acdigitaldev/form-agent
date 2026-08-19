@@ -41,21 +41,34 @@ export function PlanCard({ plan, canManage }: { plan: Plan; canManage: boolean }
         )}
       </div>
 
-      <div className="grid sm:grid-cols-2 gap-4 text-sm">
-        <ul className="flex flex-col gap-1.5">
-          {PLAN_FEATURES.free.map((f) => (
-            <li key={f} className="text-black/70 dark:text-white/70">
-              · {f}
-            </li>
-          ))}
-        </ul>
-        <ul className="flex flex-col gap-1.5">
-          {PLAN_FEATURES.pro.map((f) => (
-            <li key={f} className="text-black/70 dark:text-white/70">
-              · {f}
-            </li>
-          ))}
-        </ul>
+      <div className="grid sm:grid-cols-2 gap-6 text-sm">
+        <div>
+          <p className="text-xs font-medium text-black/50 dark:text-white/50 mb-2">FREE</p>
+          <ul className="flex flex-col gap-2">
+            {PLAN_FEATURES.free.map((f) => (
+              <li key={f.title}>
+                <p className="text-black/80 dark:text-white/80">{f.title}</p>
+                <p className="text-xs text-black/50 dark:text-white/50">{f.description}</p>
+              </li>
+            ))}
+          </ul>
+        </div>
+        <div>
+          <p className="text-xs font-medium text-black/50 dark:text-white/50 mb-2">PRO — everything in Free, plus</p>
+          <ul className="flex flex-col gap-2">
+            {PLAN_FEATURES.pro.map((f) => (
+              <li key={f.title}>
+                <p className="text-black/80 dark:text-white/80">
+                  {f.title}
+                  {f.comingSoon && (
+                    <span className="ml-2 text-xs text-black/40 dark:text-white/40">(coming soon)</span>
+                  )}
+                </p>
+                <p className="text-xs text-black/50 dark:text-white/50">{f.description}</p>
+              </li>
+            ))}
+          </ul>
+        </div>
       </div>
 
       {error && <p className="text-sm text-red-600">{error}</p>}

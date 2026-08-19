@@ -75,6 +75,7 @@ model Form {
   ctaText        String   @default("Submit")
   successMessage String   @default("Thanks! Your submission was received.")
   redirectUrl    String?
+  webhookUrl     String? // Pro only: POSTed on every submission
   isActive       Boolean  @default(true)
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
