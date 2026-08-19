@@ -9,7 +9,13 @@ export const FIELD_TYPES = [
   "checkbox",
   "number",
   "url",
+  "file",
 ] as const;
+
+/** Hard cap on file-type fields per form — bounds worst-case storage/bandwidth per submission. */
+export const MAX_FILE_FIELDS_PER_FORM = 3;
+export const MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024;
+export const MAX_WORKSPACE_STORAGE_BYTES = 500 * 1024 * 1024;
 
 export type FieldType = (typeof FIELD_TYPES)[number];
 
@@ -26,7 +32,17 @@ export const formFieldSchema = z.object({
 
 export type FormField = z.infer<typeof formFieldSchema>;
 
-export const formFieldsSchema = z.array(formFieldSchema).min(1).max(30);
+export const formFieldsSchema = z
+  .array(formFieldSchema)
+  .min(1)
+  .max(30)
+  .refine((fields) => fields.filter((f) => f.type === "file").length <= MAX_FILE_FIELDS_PER_FORM, {
+    message: `A form can have at most ${MAX_FILE_FIELDS_PER_FORM} file upload fields`,
+  });
+
+export function hasFileField(fields: FormField[]): boolean {
+  return fields.some((f) => f.type === "file");
+}
 
 export function parseFields(raw: string): FormField[] {
   try {

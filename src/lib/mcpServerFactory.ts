@@ -10,10 +10,11 @@ import {
 } from "@/lib/formsService";
 import { FORM_TEMPLATES, getTemplate } from "@/lib/templates";
 import { isPro } from "@/lib/plan";
+import { hasFileField } from "@/lib/formFields";
 
 const fieldTypeSchema = z
-  .enum(["text", "email", "phone", "textarea", "select", "checkbox", "number", "url"])
-  .describe("Input type to render for this field");
+  .enum(["text", "email", "phone", "textarea", "select", "checkbox", "number", "url", "file"])
+  .describe("Input type to render for this field. 'file' is Pro only — end-users upload a file (e.g. a CV or image) directly on the form.");
 
 const fieldSchema = z.object({
   id: z.string().describe("Stable key for this field, used as the key in submission data (e.g. 'email')"),
@@ -37,6 +38,7 @@ function errorResult(message: string) {
 }
 
 const PRO_REQUIRED = "Webhooks are a Pro feature. Upgrade from Settings to use them.";
+const PRO_REQUIRED_FILE = "File upload fields are a Pro feature. Upgrade from Settings to use them.";
 
 /** Builds a fresh MCP server scoped to one workspace. Cheap — safe to build per-request. */
 export function buildMcpServerForWorkspace(workspace: { id: string; plan: string }) {
@@ -62,6 +64,7 @@ export function buildMcpServerForWorkspace(workspace: { id: string; plan: string
     },
     async (input) => {
       if (input.webhookUrl && !isPro(workspace)) return errorResult(PRO_REQUIRED);
+      if (hasFileField(input.fields) && !isPro(workspace)) return errorResult(PRO_REQUIRED_FILE);
       try {
         return textResult({ form: await createForm(workspaceId, input) });
       } catch (err) {
@@ -107,6 +110,7 @@ export function buildMcpServerForWorkspace(workspace: { id: string; plan: string
     async ({ templateId, name, extraFields }) => {
       const template = getTemplate(templateId);
       if (!template) return errorResult(`Unknown template id: ${templateId}`);
+      if (extraFields && hasFileField(extraFields) && !isPro(workspace)) return errorResult(PRO_REQUIRED_FILE);
 
       try {
         const form = await createForm(workspaceId, {
@@ -166,6 +170,7 @@ export function buildMcpServerForWorkspace(workspace: { id: string; plan: string
     },
     async ({ formId, ...patch }) => {
       if (patch.webhookUrl && !isPro(workspace)) return errorResult(PRO_REQUIRED);
+      if (patch.fields && hasFileField(patch.fields) && !isPro(workspace)) return errorResult(PRO_REQUIRED_FILE);
       const form = await updateForm(workspaceId, formId, patch);
       return form ? textResult({ form }) : errorResult("Form not found");
     }

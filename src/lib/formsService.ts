@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/db";
 import { z } from "zod";
+import { del } from "@vercel/blob";
 import { formFieldsSchema, serializeFields, slugify } from "@/lib/formFields";
 import { serializeForm, serializeSubmission } from "@/lib/serialize";
 
@@ -101,6 +102,14 @@ export async function updateForm(workspaceId: string, formId: string, patch: Upd
 export async function deleteForm(workspaceId: string, formId: string) {
   const existing = await prisma.form.findFirst({ where: { id: formId, workspaceId } });
   if (!existing) return false;
+
+  const uploads = await prisma.fileUpload.findMany({ where: { formId }, select: { blobUrl: true } });
+  if (uploads.length > 0) {
+    await del(uploads.map((u) => u.blobUrl)).catch(() => {
+      // best-effort — the DB rows (and thus quota accounting) are removed either way via cascade
+    });
+  }
+
   await prisma.form.delete({ where: { id: formId } });
   return true;
 }

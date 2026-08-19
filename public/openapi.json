@@ -158,7 +158,8 @@
     "schemas": {
       "FieldType": {
         "type": "string",
-        "enum": ["text", "email", "phone", "textarea", "select", "checkbox", "number", "url"]
+        "enum": ["text", "email", "phone", "textarea", "select", "checkbox", "number", "url", "file"],
+        "description": "'file' is Pro only — end-users upload a file (e.g. a CV or image) directly on the form. A form may have at most 3 file fields."
       },
       "FormField": {
         "type": "object",

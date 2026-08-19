@@ -71,7 +71,13 @@ export function PublicForm({
         onChange={(e) => setValue("_hp", e.target.value)}
       />
 
-      <FormFieldsRenderer fields={fields} values={values} onChange={setValue} fieldErrors={fieldErrors} />
+      <FormFieldsRenderer
+        fields={fields}
+        values={values}
+        onChange={setValue}
+        fieldErrors={fieldErrors}
+        formSlug={slug}
+      />
 
       {error && !Object.keys(fieldErrors).length && <p className="text-sm text-red-600">{error}</p>}
 

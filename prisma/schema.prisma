@@ -27,6 +27,7 @@ model Workspace {
   invites     Invite[]
   forms       Form[]
   apiKeys     ApiKey[]
+  fileUploads FileUpload[]
 }
 
 model Membership {
@@ -81,6 +82,7 @@ model Form {
   updatedAt      DateTime @updatedAt
 
   submissions Submission[]
+  fileUploads FileUpload[]
 }
 
 model Submission {
@@ -91,4 +93,19 @@ model Submission {
   sourceIp  String?
   userAgent String?
   createdAt DateTime @default(now())
+}
+
+model FileUpload {
+  id          String    @id @default(cuid())
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  formId      String
+  form        Form      @relation(fields: [formId], references: [id], onDelete: Cascade)
+  blobUrl     String
+  pathname    String
+  sizeBytes   Int
+  contentType String?
+  createdAt   DateTime  @default(now())
+
+  @@index([workspaceId])
 }

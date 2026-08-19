@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { resolveWorkspace } from "@/lib/requestAuth";
 import { listForms, createForm, createFormInput } from "@/lib/formsService";
 import { isPro } from "@/lib/plan";
+import { hasFileField } from "@/lib/formFields";
 
 export async function GET(req: NextRequest) {
   const workspace = await resolveWorkspace(req);
@@ -24,6 +25,12 @@ export async function POST(req: NextRequest) {
   if (parsed.data.webhookUrl && !isPro(workspace)) {
     return NextResponse.json(
       { error: "Webhooks are a Pro feature. Upgrade from Settings to use them.", requiresPro: true },
+      { status: 402 }
+    );
+  }
+  if (hasFileField(parsed.data.fields) && !isPro(workspace)) {
+    return NextResponse.json(
+      { error: "File upload fields are a Pro feature. Upgrade from Settings to use them.", requiresPro: true },
       { status: 402 }
     );
   }

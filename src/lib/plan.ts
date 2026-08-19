@@ -56,6 +56,10 @@ export const PLAN_FEATURES: { free: PlanFeature[]; pro: PlanFeature[] } = {
       description: "POST every new submission to your own endpoint or automation tool the instant it lands.",
     },
     {
+      title: "File uploads",
+      description: "Let visitors attach a CV, image, or document — up to 10MB per file, 3 files per form.",
+    },
+    {
       title: "Priority template requests",
       description: "Ask for a template you need for your workflow and we'll add it to the library.",
     },

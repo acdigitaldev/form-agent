@@ -7,8 +7,8 @@ import { apiRequest, ApiError } from "./client.js";
 const server = new McpServer({ name: "agentforms", version: "0.1.0" });
 
 const fieldTypeSchema = z
-  .enum(["text", "email", "phone", "textarea", "select", "checkbox", "number", "url"])
-  .describe("Input type to render for this field");
+  .enum(["text", "email", "phone", "textarea", "select", "checkbox", "number", "url", "file"])
+  .describe("Input type to render for this field. 'file' is Pro only — end-users upload a file (e.g. a CV or image) directly on the form.");
 
 const fieldSchema = z.object({
   id: z.string().describe("Stable key for this field, used as the key in submission data (e.g. 'email')"),

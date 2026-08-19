@@ -22,6 +22,7 @@ const TYPE_LABELS: Record<FieldType, string> = {
   checkbox: "Checkbox",
   number: "Number",
   url: "URL",
+  file: "File upload (Pro)",
 };
 
 export function FormFieldsEditor({
@@ -135,7 +136,7 @@ function FieldRow({
           />
           Required
         </label>
-        {field.type !== "checkbox" && (
+        {field.type !== "checkbox" && field.type !== "file" && (
           <label className="flex items-center gap-2 text-sm text-black/70 dark:text-white/70">
             <input
               type="checkbox"

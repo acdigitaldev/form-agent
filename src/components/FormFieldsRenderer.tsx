@@ -1,17 +1,21 @@
 "use client";
 
 import type { FormField } from "@/lib/formFields";
+import { FileFieldInput } from "@/components/FileFieldInput";
 
 export function FormFieldsRenderer({
   fields,
   values,
   onChange,
   fieldErrors = {},
+  formSlug,
 }: {
   fields: FormField[];
   values: Record<string, string>;
   onChange: (id: string, value: string) => void;
   fieldErrors?: Record<string, string>;
+  /** Live form slug — enables real uploads for "file" fields. Omit for dashboard previews. */
+  formSlug?: string;
 }) {
   return (
     <>
@@ -65,6 +69,13 @@ export function FormFieldsRenderer({
                 {field.label}
                 {field.required && <span className="text-red-600"> *</span>}
               </label>
+            ) : field.type === "file" ? (
+              <FileFieldInput
+                fieldId={field.id}
+                formSlug={formSlug}
+                value={values[field.id] ?? ""}
+                onChange={(value) => onChange(field.id, value)}
+              />
             ) : (
               <input
                 type={field.type === "phone" ? "tel" : field.type}
