@@ -1,0 +1,188 @@
+import Link from "next/link";
+import { AppShellHeader, AppShellFooter } from "@/components/AppShellHeader";
+import { McpFlowDiagram } from "@/app/McpFlowDiagram";
+
+const ARTICLES = [
+  { id: "getting-started", title: "Getting started" },
+  { id: "templates", title: "Templates" },
+  { id: "connecting-agents", title: "Connecting an agent" },
+  { id: "field-types", title: "Field types" },
+  { id: "gdpr", title: "GDPR & privacy notices" },
+  { id: "embedding", title: "Embedding a form" },
+  { id: "plans", title: "Plans & billing" },
+  { id: "api-reference", title: "API reference" },
+  { id: "faq", title: "FAQ" },
+];
+
+export const metadata = { title: "Docs — AgentForms" };
+
+export default async function DocsPage() {
+  return (
+    <main className="flex-1 flex flex-col">
+      <AppShellHeader active="docs" />
+
+      <div className="mx-auto max-w-5xl w-full px-6 py-16 flex gap-10">
+        <nav className="hidden md:block w-48 shrink-0">
+          <ul className="sticky top-24 flex flex-col gap-1 text-sm">
+            {ARTICLES.map((a) => (
+              <li key={a.id}>
+                <a href={`#${a.id}`} className="block py-1 text-black/60 dark:text-white/60 hover:text-foreground">
+                  {a.title}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </nav>
+
+        <div className="flex-1 max-w-2xl flex flex-col gap-14">
+          <div>
+            <h1 className="text-2xl font-semibold tracking-tight">Docs</h1>
+            <p className="text-sm text-black/60 dark:text-white/60 mt-1">
+              Everything you need to create forms, capture leads, and connect agents.
+            </p>
+          </div>
+
+          <Article id="getting-started" title="Getting started">
+            <P>
+              The homepage <em>is</em> the form builder — pick a template or start from scratch, add
+              fields, and preview it live. No account needed until you actually publish it. Once you
+              create your account, that form (and every one after it) gets a hosted public URL under{" "}
+              <code>/f/&lt;slug&gt;</code> that anyone can fill out — no account required on their end.
+            </P>
+            <P>
+              You can also skip the UI entirely and ask an agent (Claude, ChatGPT, or any MCP client) to
+              create a form for you — see &quot;Connecting an agent&quot; below.
+            </P>
+          </Article>
+
+          <Article id="templates" title="Templates">
+            <P>
+              Step 1 of the form builder offers one-click templates — newsletter signup, contact form,
+              demo request, customer survey, event RSVP, and job application — each pre-filled with
+              sensible fields, a matching submit button label, and success message. Pick one, tweak
+              anything, done. &quot;Start from scratch&quot; skips straight to a blank form.
+            </P>
+            <P>
+              Agents get the same shortcut: <code>list_templates</code> returns the available templates,
+              and <code>create_form_from_template</code> creates one in a single call — optionally with a
+              custom name or extra fields appended on top of the template&apos;s defaults.
+            </P>
+          </Article>
+
+          <Article id="connecting-agents" title="Connecting an agent">
+            <P>
+              Sign up, then go to <strong>Connectors</strong> in your dashboard and generate a token — that
+              gives you a ready-to-use server URL:
+            </P>
+            <Pre>{`https://<your-domain>/api/mcp/<token>`}</Pre>
+            <P>
+              Paste that URL into Claude Desktop&apos;s custom connector settings, run{" "}
+              <code>claude mcp add --transport http</code> for Claude Code, or point any other MCP client
+              that supports remote servers at it — no extra headers or OAuth flow needed, the token in the
+              URL is the only credential required. For ChatGPT, use the OpenAPI action instead: import{" "}
+              <code>/openapi.json</code> and authenticate with the raw token as a Bearer key.
+            </P>
+            <div className="py-4">
+              <McpFlowDiagram />
+            </div>
+            <P>
+              Once connected, the agent has eight tools available: <code>create_form</code>,{" "}
+              <code>list_forms</code>, <code>get_form</code>, <code>update_form</code>,{" "}
+              <code>delete_form</code>, <code>list_submissions</code>, <code>list_templates</code>, and{" "}
+              <code>create_form_from_template</code>.
+            </P>
+          </Article>
+
+          <Article id="field-types" title="Field types">
+            <P>Each form field has a type that controls how it renders and validates on the public page:</P>
+            <ul className="list-disc pl-5 flex flex-col gap-1 text-sm">
+              <li><code>text</code> — single-line text</li>
+              <li><code>email</code> — validated email address</li>
+              <li><code>phone</code> — phone number input</li>
+              <li><code>textarea</code> — multi-line text</li>
+              <li><code>select</code> — dropdown, needs an <code>options</code> list</li>
+              <li><code>checkbox</code> — single checkbox</li>
+              <li><code>number</code> — numeric input</li>
+              <li><code>url</code> — link input</li>
+            </ul>
+          </Article>
+
+          <Article id="gdpr" title="GDPR & privacy notices">
+            <P>
+              Every form has an editable privacy notice that renders as small print under the submit button
+              on the public page — no consent checkbox required, just clear disclosure of what happens to
+              the data. Edit it per form under <strong>Settings</strong> on that form&apos;s detail page, or
+              during step 4 of the builder. This is plain text, not legal advice — adjust the wording to
+              match your actual data handling and jurisdiction.
+            </P>
+          </Article>
+
+          <Article id="embedding" title="Embedding a form">
+            <P>
+              Every form detail page has a ready-made <code>&lt;iframe&gt;</code> snippet under{" "}
+              <strong>Public link</strong>. Paste it into any site. The embedded version drops the
+              dashboard chrome automatically via the <code>?embed=1</code> query parameter.
+            </P>
+          </Article>
+
+          <Article id="plans" title="Plans & billing">
+            <P>
+              Free covers unlimited forms, submissions, fields, and full MCP/API access — the only thing it
+              adds is a small &quot;Powered by AgentForms&quot; badge on public form pages.{" "}
+              <strong>Pro</strong> removes that badge and adds CSV export, submission webhooks, and team
+              invites. See <Link href="/pricing" className="underline">Pricing</Link> for rates, or manage
+              your plan from <Link href="/dashboard/settings" className="underline">Settings</Link>.
+            </P>
+          </Article>
+
+          <Article id="api-reference" title="API reference">
+            <P>
+              The full REST API — the same one the MCP connector and dashboard both use — is documented as
+              an OpenAPI 3.1 schema at <code>/openapi.json</code>. Authenticate with{" "}
+              <code>Authorization: Bearer &lt;token&gt;</code> using a token from Connectors.
+            </P>
+          </Article>
+
+          <Article id="faq" title="FAQ">
+            <P>
+              <strong>Do I need an account to try it?</strong> No — build the whole form on the homepage
+              first. You only need an account to publish it and start collecting real submissions.
+            </P>
+            <P>
+              <strong>Can I have a team?</strong> Yes, on Pro — invite people from{" "}
+              <Link href="/dashboard/settings" className="underline">Settings</Link>. Owners can invite,
+              remove members, and manage tokens; members can create and edit forms.
+            </P>
+            <P>
+              <strong>What happens if I revoke a connector token?</strong> Any agent using it loses access
+              immediately — existing forms and submissions are untouched.
+            </P>
+            <P>
+              <strong>Is there spam protection on public forms?</strong> Yes — a hidden honeypot field and a
+              per-IP rate limit on submissions.
+            </P>
+          </Article>
+        </div>
+      </div>
+
+      <AppShellFooter />
+    </main>
+  );
+}
+
+function Article({ id, title, children }: { id: string; title: string; children: React.ReactNode }) {
+  return (
+    <section id={id} className="scroll-mt-24 flex flex-col gap-3">
+      <h2 className="text-lg font-semibold tracking-tight">{title}</h2>
+      {children}
+    </section>
+  );
+}
+
+function P({ children }: { children: React.ReactNode }) {
+  return <p className="text-sm text-black/70 dark:text-white/70 leading-relaxed">{children}</p>;
+}
+
+function Pre({ children }: { children: React.ReactNode }) {
+  return <pre className="text-xs rounded bg-black/5 dark:bg-white/10 p-3 overflow-x-auto">{children}</pre>;
+}

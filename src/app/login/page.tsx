@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { readDraftForm, claimDraftFormOrDashboard } from "@/lib/draftForm";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -11,6 +12,12 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [draftName, setDraftName] = useState<string | null>(null);
+
+  useEffect(() => {
+    const draft = readDraftForm();
+    if (draft) setDraftName(draft.name || "your form");
+  }, []);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -18,13 +25,16 @@ export default function LoginPage() {
     setLoading(true);
 
     const result = await signIn("credentials", { email, password, redirect: false });
-    setLoading(false);
 
     if (result?.error) {
+      setLoading(false);
       setError("Invalid email or password");
       return;
     }
-    router.push("/dashboard");
+
+    const destination = await claimDraftFormOrDashboard();
+    setLoading(false);
+    router.push(destination);
     router.refresh();
   }
 
@@ -33,7 +43,9 @@ export default function LoginPage() {
       <div className="w-full max-w-sm flex flex-col gap-6">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Log in</h1>
-          <p className="text-sm text-black/60 dark:text-white/60 mt-1">Welcome back to AgentForms.</p>
+          <p className="text-sm text-black/60 dark:text-white/60 mt-1">
+            {draftName ? `Log in to publish “${draftName}”.` : "Welcome back to AgentForms."}
+          </p>
         </div>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">

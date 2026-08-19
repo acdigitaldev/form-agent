@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { readDraftForm, claimDraftFormOrDashboard } from "@/lib/draftForm";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -11,6 +12,12 @@ export default function RegisterPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [draftName, setDraftName] = useState<string | null>(null);
+
+  useEffect(() => {
+    const draft = readDraftForm();
+    if (draft) setDraftName(draft.name || "your form");
+  }, []);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -31,14 +38,17 @@ export default function RegisterPage() {
     }
 
     const result = await signIn("credentials", { email, password, redirect: false });
-    setLoading(false);
 
     if (result?.error) {
+      setLoading(false);
       setError("Account created — please log in.");
       router.push("/login");
       return;
     }
-    router.push("/dashboard");
+
+    const destination = await claimDraftFormOrDashboard();
+    setLoading(false);
+    router.push(destination);
     router.refresh();
   }
 
@@ -48,7 +58,9 @@ export default function RegisterPage() {
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Create your account</h1>
           <p className="text-sm text-black/60 dark:text-white/60 mt-1">
-            Start creating forms from Claude, ChatGPT, or any MCP client.
+            {draftName
+              ? `One more step to publish “${draftName}” and start collecting submissions.`
+              : "Start creating forms from Claude, ChatGPT, or any MCP client."}
           </p>
         </div>
 
@@ -83,7 +95,7 @@ export default function RegisterPage() {
             disabled={loading}
             className="rounded-md bg-foreground text-background px-4 py-2 font-medium hover:opacity-90 disabled:opacity-50"
           >
-            {loading ? "Creating account…" : "Create account"}
+            {loading ? "Creating account…" : draftName ? "Create account & publish form" : "Create account"}
           </button>
         </form>
 

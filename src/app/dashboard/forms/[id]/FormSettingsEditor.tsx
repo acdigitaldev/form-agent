@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { FormFieldsEditor } from "../../FormFieldsEditor";
+import { FormFieldsEditor } from "@/components/FormFieldsEditor";
 import type { FormField } from "@/lib/formFields";
 
 export function FormSettingsEditor({
