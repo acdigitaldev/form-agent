@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { resolveWorkspace } from "@/lib/requestAuth";
-import { getForm, updateForm, deleteForm, updateFormInput } from "@/lib/formsService";
+import { getForm, updateForm, deleteForm, updateFormInput, SlugTakenError } from "@/lib/formsService";
 import { isPro } from "@/lib/plan";
 import { hasFileField } from "@/lib/formFields";
 
@@ -37,11 +37,23 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
       { status: 402 }
     );
   }
+  if (parsed.data.logoUrl && !isPro(workspace)) {
+    return NextResponse.json(
+      { error: "A custom logo is a Pro feature. Upgrade from Settings to use it.", requiresPro: true },
+      { status: 402 }
+    );
+  }
 
-  const form = await updateForm(workspace.id, id, parsed.data);
-  if (!form) return NextResponse.json({ error: "Form not found" }, { status: 404 });
-
-  return NextResponse.json({ form });
+  try {
+    const form = await updateForm(workspace.id, id, parsed.data);
+    if (!form) return NextResponse.json({ error: "Form not found" }, { status: 404 });
+    return NextResponse.json({ form });
+  } catch (err) {
+    if (err instanceof SlugTakenError) {
+      return NextResponse.json({ error: err.message }, { status: 409 });
+    }
+    throw err;
+  }
 }
 
 export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {

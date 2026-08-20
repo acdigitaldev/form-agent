@@ -16,6 +16,14 @@ export const FIELD_TYPES = [
 export const MAX_FILE_FIELDS_PER_FORM = 3;
 export const MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024;
 export const MAX_WORKSPACE_STORAGE_BYTES = 500 * 1024 * 1024;
+export const MAX_LOGO_SIZE_BYTES = 2 * 1024 * 1024;
+
+/** Vanity public-link slug: lowercase letters, numbers, single hyphens between them. */
+export const slugSchema = z
+  .string()
+  .min(1)
+  .max(60)
+  .regex(/^[a-z0-9]+(-[a-z0-9]+)*$/, "Use lowercase letters, numbers, and hyphens only");
 
 export type FieldType = (typeof FIELD_TYPES)[number];
 

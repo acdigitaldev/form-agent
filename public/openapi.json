@@ -30,7 +30,8 @@
           "201": {
             "description": "Created",
             "content": { "application/json": { "schema": { "$ref": "#/components/schemas/FormResponse" } } }
-          }
+          },
+          "409": { "description": "The requested slug is already taken" }
         }
       }
     },
@@ -58,7 +59,9 @@
           "200": {
             "description": "OK",
             "content": { "application/json": { "schema": { "$ref": "#/components/schemas/FormResponse" } } }
-          }
+          },
+          "402": { "description": "Requires Pro plan (webhookUrl, a file field, or logoUrl was set)" },
+          "409": { "description": "The requested slug is already taken" }
         }
       },
       "delete": {
@@ -185,7 +188,9 @@
           "redirectUrl": { "type": "string", "format": "uri" },
           "gdprText": { "type": "string", "description": "Privacy/consent notice shown below the submit button" },
           "ctaText": { "type": "string", "description": "Submit button label, defaults to 'Submit'" },
-          "webhookUrl": { "type": "string", "format": "uri", "description": "Pro only — POSTed on every submission" }
+          "webhookUrl": { "type": "string", "format": "uri", "description": "Pro only — POSTed on every submission" },
+          "slug": { "type": "string", "description": "Custom public link slug, e.g. 'my-form' for /f/my-form. Auto-generated from the name if omitted. Lowercase letters, numbers, and hyphens only." },
+          "publicTitle": { "type": "string", "description": "Overrides the browser tab title on the public form page; defaults to the form name" }
         }
       },
       "UpdateFormRequest": {
@@ -199,7 +204,10 @@
           "gdprText": { "type": "string" },
           "ctaText": { "type": "string" },
           "webhookUrl": { "type": "string", "nullable": true, "description": "Pro only — POSTed on every submission" },
-          "isActive": { "type": "boolean" }
+          "isActive": { "type": "boolean" },
+          "slug": { "type": "string", "description": "Custom public link slug, e.g. 'my-form' for /f/my-form. Lowercase letters, numbers, and hyphens only. 409 if already taken." },
+          "publicTitle": { "type": "string", "nullable": true, "description": "Overrides the browser tab title on the public form page" },
+          "logoUrl": { "type": "string", "nullable": true, "description": "Pro only — image URL shown above the form on the public page. Set via the dashboard logo upload, or directly here." }
         }
       },
       "Form": {
@@ -213,6 +221,8 @@
           "gdprText": { "type": "string" },
           "ctaText": { "type": "string" },
           "webhookUrl": { "type": "string", "nullable": true },
+          "publicTitle": { "type": "string", "nullable": true },
+          "logoUrl": { "type": "string", "nullable": true },
           "successMessage": { "type": "string" },
           "redirectUrl": { "type": "string", "nullable": true },
           "isActive": { "type": "boolean" },

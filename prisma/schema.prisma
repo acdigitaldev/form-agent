@@ -77,6 +77,8 @@ model Form {
   successMessage String   @default("Thanks! Your submission was received.")
   redirectUrl    String?
   webhookUrl     String? // Pro only: POSTed on every submission
+  publicTitle    String? // Overrides the browser tab title on the public form page; defaults to name
+  logoUrl        String? // Pro only: shown above the form on the public page
   isActive       Boolean  @default(true)
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt

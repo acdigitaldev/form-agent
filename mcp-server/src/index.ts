@@ -10,6 +10,12 @@ const fieldTypeSchema = z
   .enum(["text", "email", "phone", "textarea", "select", "checkbox", "number", "url", "file"])
   .describe("Input type to render for this field. 'file' is Pro only — end-users upload a file (e.g. a CV or image) directly on the form.");
 
+const slugSchema = z
+  .string()
+  .min(1)
+  .max(60)
+  .regex(/^[a-z0-9]+(-[a-z0-9]+)*$/, "Use lowercase letters, numbers, and hyphens only");
+
 const fieldSchema = z.object({
   id: z.string().describe("Stable key for this field, used as the key in submission data (e.g. 'email')"),
   label: z.string().describe("Human-readable label shown on the form"),
@@ -47,6 +53,8 @@ server.registerTool(
       gdprText: z.string().optional().describe("Privacy/consent notice shown below the submit button"),
       ctaText: z.string().optional().describe("Submit button label, defaults to 'Submit'"),
       webhookUrl: z.string().url().optional().describe("Pro only — POSTed on every submission"),
+      slug: slugSchema.optional().describe("Custom public link slug, e.g. 'my-form' for /f/my-form. Auto-generated from the name if omitted."),
+      publicTitle: z.string().optional().describe("Overrides the browser tab title on the public form page; defaults to the form name"),
     },
   },
   async (input) => {
@@ -156,6 +164,9 @@ server.registerTool(
       ctaText: z.string().optional(),
       webhookUrl: z.string().url().nullable().optional().describe("Pro only — POSTed on every submission"),
       isActive: z.boolean().optional().describe("Set false to pause the form and stop accepting submissions"),
+      slug: slugSchema.optional().describe("Custom public link slug, e.g. 'my-form' for /f/my-form"),
+      publicTitle: z.string().nullable().optional().describe("Overrides the browser tab title on the public form page"),
+      logoUrl: z.string().url().nullable().optional().describe("Pro only — image URL shown above the form on the public page"),
     },
   },
   async ({ formId, ...patch }) => {

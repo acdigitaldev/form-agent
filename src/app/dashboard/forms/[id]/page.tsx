@@ -79,6 +79,10 @@ export default async function FormDetailPage({ params }: { params: Promise<{ id:
           initialGdprText={form.gdprText}
           initialCtaText={form.ctaText}
           initialWebhookUrl={form.webhookUrl ?? ""}
+          initialSlug={form.slug}
+          initialPublicTitle={form.publicTitle ?? ""}
+          initialLogoUrl={form.logoUrl ?? ""}
+          origin={process.env.APP_URL ?? "http://localhost:3000"}
           isPro={isPro(workspace)}
         />
       </section>

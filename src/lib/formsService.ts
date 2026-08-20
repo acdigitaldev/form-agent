@@ -1,8 +1,16 @@
 import { prisma } from "@/lib/db";
 import { z } from "zod";
 import { del } from "@vercel/blob";
-import { formFieldsSchema, serializeFields, slugify } from "@/lib/formFields";
+import { formFieldsSchema, serializeFields, slugify, slugSchema } from "@/lib/formFields";
 import { serializeForm, serializeSubmission } from "@/lib/serialize";
+
+/** Thrown when a caller-supplied slug is already taken by another form. */
+export class SlugTakenError extends Error {
+  constructor(slug: string) {
+    super(`The link "${slug}" is already taken`);
+    this.name = "SlugTakenError";
+  }
+}
 
 export const createFormInput = z.object({
   name: z.string().min(1).max(120),
@@ -13,6 +21,8 @@ export const createFormInput = z.object({
   gdprText: z.string().max(1000).optional(),
   ctaText: z.string().min(1).max(40).optional(),
   webhookUrl: z.string().url().optional(),
+  slug: slugSchema.optional(),
+  publicTitle: z.string().max(120).optional(),
 });
 export type CreateFormInput = z.infer<typeof createFormInput>;
 
@@ -26,6 +36,9 @@ export const updateFormInput = z.object({
   ctaText: z.string().min(1).max(40).optional(),
   webhookUrl: z.string().url().nullable().optional(),
   isActive: z.boolean().optional(),
+  slug: slugSchema.optional(),
+  publicTitle: z.string().max(120).nullable().optional(),
+  logoUrl: z.string().url().nullable().optional(),
 });
 export type UpdateFormInput = z.infer<typeof updateFormInput>;
 
@@ -40,6 +53,11 @@ async function uniqueSlug(name: string) {
   return slug;
 }
 
+async function assertSlugAvailable(slug: string, excludeFormId?: string) {
+  const existing = await prisma.form.findUnique({ where: { slug } });
+  if (existing && existing.id !== excludeFormId) throw new SlugTakenError(slug);
+}
+
 export async function listForms(workspaceId: string, sort: "newest" | "oldest" = "newest") {
   const forms = await prisma.form.findMany({
     where: { workspaceId },
@@ -50,7 +68,14 @@ export async function listForms(workspaceId: string, sort: "newest" | "oldest" =
 }
 
 export async function createForm(workspaceId: string, input: CreateFormInput) {
-  const slug = await uniqueSlug(input.name);
+  let slug: string;
+  if (input.slug) {
+    await assertSlugAvailable(input.slug);
+    slug = input.slug;
+  } else {
+    slug = await uniqueSlug(input.name);
+  }
+
   const form = await prisma.form.create({
     data: {
       workspaceId,
@@ -63,6 +88,7 @@ export async function createForm(workspaceId: string, input: CreateFormInput) {
       ...(input.gdprText !== undefined ? { gdprText: input.gdprText } : {}),
       ...(input.ctaText !== undefined ? { ctaText: input.ctaText } : {}),
       ...(input.webhookUrl !== undefined ? { webhookUrl: input.webhookUrl } : {}),
+      ...(input.publicTitle !== undefined ? { publicTitle: input.publicTitle } : {}),
     },
     include: { _count: { select: { submissions: true } } },
   });
@@ -81,6 +107,15 @@ export async function updateForm(workspaceId: string, formId: string, patch: Upd
   const existing = await prisma.form.findFirst({ where: { id: formId, workspaceId } });
   if (!existing) return null;
 
+  if (patch.slug !== undefined && patch.slug !== existing.slug) {
+    await assertSlugAvailable(patch.slug, formId);
+  }
+  if (patch.logoUrl !== undefined && existing.logoUrl && existing.logoUrl !== patch.logoUrl) {
+    await del(existing.logoUrl).catch(() => {
+      // best-effort — a stray blob left behind isn't worth failing the save over
+    });
+  }
+
   const form = await prisma.form.update({
     where: { id: formId },
     data: {
@@ -93,6 +128,9 @@ export async function updateForm(workspaceId: string, formId: string, patch: Upd
       ...(patch.ctaText !== undefined ? { ctaText: patch.ctaText } : {}),
       ...(patch.webhookUrl !== undefined ? { webhookUrl: patch.webhookUrl } : {}),
       ...(patch.isActive !== undefined ? { isActive: patch.isActive } : {}),
+      ...(patch.slug !== undefined ? { slug: patch.slug } : {}),
+      ...(patch.publicTitle !== undefined ? { publicTitle: patch.publicTitle } : {}),
+      ...(patch.logoUrl !== undefined ? { logoUrl: patch.logoUrl } : {}),
     },
     include: { _count: { select: { submissions: true } } },
   });
@@ -104,8 +142,9 @@ export async function deleteForm(workspaceId: string, formId: string) {
   if (!existing) return false;
 
   const uploads = await prisma.fileUpload.findMany({ where: { formId }, select: { blobUrl: true } });
-  if (uploads.length > 0) {
-    await del(uploads.map((u) => u.blobUrl)).catch(() => {
+  const blobUrls = uploads.map((u) => u.blobUrl).concat(existing.logoUrl ? [existing.logoUrl] : []);
+  if (blobUrls.length > 0) {
+    await del(blobUrls).catch(() => {
       // best-effort — the DB rows (and thus quota accounting) are removed either way via cascade
     });
   }

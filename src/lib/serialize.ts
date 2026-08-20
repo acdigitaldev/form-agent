@@ -11,6 +11,8 @@ type FormRecord = {
   successMessage: string;
   redirectUrl: string | null;
   webhookUrl: string | null;
+  publicTitle: string | null;
+  logoUrl: string | null;
   isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
@@ -29,6 +31,8 @@ export function serializeForm(form: FormRecord) {
     successMessage: form.successMessage,
     redirectUrl: form.redirectUrl,
     webhookUrl: form.webhookUrl,
+    publicTitle: form.publicTitle,
+    logoUrl: form.logoUrl,
     isActive: form.isActive,
     createdAt: form.createdAt,
     updatedAt: form.updatedAt,

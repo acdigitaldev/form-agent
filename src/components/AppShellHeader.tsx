@@ -52,16 +52,27 @@ export async function AppShellHeader({ active }: { active?: "forms" | "docs" | "
 export function AppShellFooter() {
   return (
     <footer className="mt-auto border-t border-black/10 dark:border-white/10">
-      <div className="mx-auto max-w-5xl px-6 py-6 flex items-center justify-between flex-wrap gap-2">
+      <div className="mx-auto max-w-5xl px-6 py-6 flex items-center justify-between flex-wrap gap-3">
         <span className="text-sm text-black/50 dark:text-white/50">AgentForms — forms for agents.</span>
-        <a
-          href="https://growthwithalex.com/"
-          target="_blank"
-          rel="noreferrer"
-          className="text-xs text-black/30 dark:text-white/30 hover:underline"
-        >
-          Product by Growth with Alex
-        </a>
+        <nav className="flex items-center gap-4 text-xs text-black/40 dark:text-white/40">
+          <Link href="/privacy" className="hover:underline">
+            Privacy
+          </Link>
+          <Link href="/terms" className="hover:underline">
+            Terms
+          </Link>
+          <Link href="/security" className="hover:underline">
+            Security
+          </Link>
+          <a
+            href="https://growthwithalex.com/"
+            target="_blank"
+            rel="noreferrer"
+            className="text-black/30 dark:text-white/30 hover:underline"
+          >
+            Product by Growth with Alex
+          </a>
+        </nav>
       </div>
     </footer>
   );

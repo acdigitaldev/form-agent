@@ -7,10 +7,11 @@ import {
   updateForm,
   deleteForm,
   listSubmissionsForForm,
+  SlugTakenError,
 } from "@/lib/formsService";
 import { FORM_TEMPLATES, getTemplate } from "@/lib/templates";
 import { isPro } from "@/lib/plan";
-import { hasFileField } from "@/lib/formFields";
+import { hasFileField, slugSchema } from "@/lib/formFields";
 
 const fieldTypeSchema = z
   .enum(["text", "email", "phone", "textarea", "select", "checkbox", "number", "url", "file"])
@@ -39,6 +40,7 @@ function errorResult(message: string) {
 
 const PRO_REQUIRED = "Webhooks are a Pro feature. Upgrade from Settings to use them.";
 const PRO_REQUIRED_FILE = "File upload fields are a Pro feature. Upgrade from Settings to use them.";
+const PRO_REQUIRED_LOGO = "A custom logo is a Pro feature. Upgrade from Settings to use it.";
 
 /** Builds a fresh MCP server scoped to one workspace. Cheap — safe to build per-request. */
 export function buildMcpServerForWorkspace(workspace: { id: string; plan: string }) {
@@ -60,6 +62,8 @@ export function buildMcpServerForWorkspace(workspace: { id: string; plan: string
         gdprText: z.string().optional().describe("Privacy/consent notice shown below the submit button"),
         ctaText: z.string().optional().describe("Submit button label, defaults to 'Submit'"),
         webhookUrl: z.string().url().optional().describe("Pro only — POSTed on every submission"),
+        slug: slugSchema.optional().describe("Custom public link slug, e.g. 'my-form' for /f/my-form. Auto-generated from the name if omitted."),
+        publicTitle: z.string().optional().describe("Overrides the browser tab title on the public form page; defaults to the form name"),
       },
     },
     async (input) => {
@@ -68,6 +72,7 @@ export function buildMcpServerForWorkspace(workspace: { id: string; plan: string
       try {
         return textResult({ form: await createForm(workspaceId, input) });
       } catch (err) {
+        if (err instanceof SlugTakenError) return errorResult(err.message);
         return errorResult(String(err));
       }
     }
@@ -166,13 +171,22 @@ export function buildMcpServerForWorkspace(workspace: { id: string; plan: string
         ctaText: z.string().optional(),
         webhookUrl: z.string().url().nullable().optional().describe("Pro only — POSTed on every submission"),
         isActive: z.boolean().optional().describe("Set false to pause the form"),
+        slug: slugSchema.optional().describe("Custom public link slug, e.g. 'my-form' for /f/my-form"),
+        publicTitle: z.string().nullable().optional().describe("Overrides the browser tab title on the public form page"),
+        logoUrl: z.string().url().nullable().optional().describe("Pro only — image URL shown above the form on the public page"),
       },
     },
     async ({ formId, ...patch }) => {
       if (patch.webhookUrl && !isPro(workspace)) return errorResult(PRO_REQUIRED);
       if (patch.fields && hasFileField(patch.fields) && !isPro(workspace)) return errorResult(PRO_REQUIRED_FILE);
-      const form = await updateForm(workspaceId, formId, patch);
-      return form ? textResult({ form }) : errorResult("Form not found");
+      if (patch.logoUrl && !isPro(workspace)) return errorResult(PRO_REQUIRED_LOGO);
+      try {
+        const form = await updateForm(workspaceId, formId, patch);
+        return form ? textResult({ form }) : errorResult("Form not found");
+      } catch (err) {
+        if (err instanceof SlugTakenError) return errorResult(err.message);
+        return errorResult(String(err));
+      }
     }
   );
 

@@ -44,6 +44,10 @@ export const PLAN_FEATURES: { free: PlanFeature[]; pro: PlanFeature[] } = {
       description: "No “Powered by AgentForms” badge on public forms — fully white-label for your audience.",
     },
     {
+      title: "Custom logo",
+      description: "Upload your own logo to show above every public form, in place of ours.",
+    },
+    {
       title: "Team workspaces",
       description: "Invite unlimited teammates with owner/member roles, sharing every form and connector token.",
     },

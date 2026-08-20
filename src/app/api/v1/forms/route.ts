@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { resolveWorkspace } from "@/lib/requestAuth";
-import { listForms, createForm, createFormInput } from "@/lib/formsService";
+import { listForms, createForm, createFormInput, SlugTakenError } from "@/lib/formsService";
 import { isPro } from "@/lib/plan";
 import { hasFileField } from "@/lib/formFields";
 
@@ -35,6 +35,13 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const form = await createForm(workspace.id, parsed.data);
-  return NextResponse.json({ form }, { status: 201 });
+  try {
+    const form = await createForm(workspace.id, parsed.data);
+    return NextResponse.json({ form }, { status: 201 });
+  } catch (err) {
+    if (err instanceof SlugTakenError) {
+      return NextResponse.json({ error: err.message }, { status: 409 });
+    }
+    throw err;
+  }
 }

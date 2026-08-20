@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { FormFieldsEditor } from "@/components/FormFieldsEditor";
+import { LogoUploadInput } from "@/components/LogoUploadInput";
 import type { FormField } from "@/lib/formFields";
 
 export function FormSettingsEditor({
@@ -17,6 +18,10 @@ export function FormSettingsEditor({
   initialGdprText,
   initialCtaText,
   initialWebhookUrl,
+  initialSlug,
+  initialPublicTitle,
+  initialLogoUrl,
+  origin,
   isPro,
 }: {
   formId: string;
@@ -29,6 +34,10 @@ export function FormSettingsEditor({
   initialGdprText: string;
   initialCtaText: string;
   initialWebhookUrl: string;
+  initialSlug: string;
+  initialPublicTitle: string;
+  initialLogoUrl: string;
+  origin: string;
   isPro: boolean;
 }) {
   const router = useRouter();
@@ -41,6 +50,9 @@ export function FormSettingsEditor({
   const [gdprText, setGdprText] = useState(initialGdprText);
   const [ctaText, setCtaText] = useState(initialCtaText);
   const [webhookUrl, setWebhookUrl] = useState(initialWebhookUrl);
+  const [slug, setSlug] = useState(initialSlug);
+  const [publicTitle, setPublicTitle] = useState(initialPublicTitle);
+  const [logoUrl, setLogoUrl] = useState(initialLogoUrl);
   const [status, setStatus] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -62,7 +74,9 @@ export function FormSettingsEditor({
         redirectUrl: redirectUrl || null,
         gdprText,
         ctaText: ctaText || "Submit",
-        ...(isPro ? { webhookUrl: webhookUrl || null } : {}),
+        slug,
+        publicTitle: publicTitle || null,
+        ...(isPro ? { webhookUrl: webhookUrl || null, logoUrl: logoUrl || null } : {}),
       }),
     });
 
@@ -111,6 +125,54 @@ export function FormSettingsEditor({
           className="rounded-md border border-black/15 dark:border-white/20 bg-transparent px-3 py-2 outline-none focus:border-black/40 dark:focus:border-white/40"
         />
       </label>
+
+      <label className="flex flex-col gap-1 text-sm">
+        Public link
+        <div className="flex items-center rounded-md border border-black/15 dark:border-white/20 focus-within:border-black/40 dark:focus-within:border-white/40">
+          <span className="pl-3 pr-1 py-2 text-black/40 dark:text-white/40 whitespace-nowrap">{origin}/f/</span>
+          <input
+            type="text"
+            value={slug}
+            onChange={(e) => setSlug(e.target.value.toLowerCase())}
+            className="flex-1 min-w-0 bg-transparent py-2 pr-3 outline-none"
+          />
+        </div>
+        <span className="text-xs text-black/50 dark:text-white/50">
+          Lowercase letters, numbers, and hyphens only.
+        </span>
+      </label>
+
+      <label className="flex flex-col gap-1 text-sm">
+        Public page title
+        <input
+          type="text"
+          placeholder={name || "Defaults to the form name"}
+          value={publicTitle}
+          onChange={(e) => setPublicTitle(e.target.value)}
+          className="rounded-md border border-black/15 dark:border-white/20 bg-transparent px-3 py-2 outline-none focus:border-black/40 dark:focus:border-white/40"
+        />
+        <span className="text-xs text-black/50 dark:text-white/50">
+          Shown as the browser tab title on the public form page.
+        </span>
+      </label>
+
+      {isPro ? (
+        <div className="flex flex-col gap-1 text-sm">
+          Logo
+          <LogoUploadInput formId={formId} logoUrl={logoUrl} onChange={setLogoUrl} />
+          <span className="text-xs text-black/50 dark:text-white/50">
+            Shown above the form on the public page.
+          </span>
+        </div>
+      ) : (
+        <div className="rounded-md border border-dashed border-black/15 dark:border-white/20 px-3 py-3 text-sm text-black/50 dark:text-white/50">
+          A custom logo on the public page is a{" "}
+          <Link href="/dashboard/settings" className="underline">
+            Pro
+          </Link>{" "}
+          feature.
+        </div>
+      )}
 
       <div>
         <p className="text-sm font-medium mb-3">Fields</p>
