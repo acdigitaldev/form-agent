@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { getUserWorkspace, createWorkspaceForUser } from "@/lib/workspace";
+import { Logo } from "@/components/Logo";
 import { AccountMenu } from "./AccountMenu";
 
 const NAV_LINKS = [
@@ -28,8 +29,8 @@ export default async function DashboardLayout({ children }: { children: React.Re
       <header className="border-b border-black/10 dark:border-white/10">
         <div className="mx-auto max-w-6xl px-6 py-4 flex flex-wrap items-center justify-between gap-y-2">
           <div className="flex items-center gap-8">
-            <Link href="/dashboard" className="font-semibold tracking-tight">
-              AgentForms
+            <Link href="/dashboard">
+              <Logo />
             </Link>
             <nav className="flex items-center gap-5 text-sm">
               {NAV_LINKS.map((link) => (

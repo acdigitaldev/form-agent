@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { auth } from "@/auth";
+import { Logo } from "@/components/Logo";
 
 export async function AppShellHeader({ active }: { active?: "forms" | "docs" | "pricing" }) {
   const session = await auth();
@@ -10,8 +11,8 @@ export async function AppShellHeader({ active }: { active?: "forms" | "docs" | "
   return (
     <header className="border-b border-black/10 dark:border-white/10">
       <div className="mx-auto max-w-5xl px-6 py-4 flex items-center justify-between">
-        <Link href="/" className="font-semibold tracking-tight">
-          AgentForms
+        <Link href="/">
+          <Logo />
         </Link>
         <nav className="flex items-center gap-4 text-sm">
           <Link href="/" className={linkClass("forms")}>
