@@ -7,13 +7,19 @@ import {
   type FontSizeKey,
   type CornerRadiusKey,
 } from "@/lib/formTheme";
+import { ColorSwatchPicker } from "@/components/ColorSwatchPicker";
 
-const COLOR_FIELDS: { key: keyof FormTheme; label: string; defaultValue: string }[] = [
-  { key: "cardBackgroundColor", label: "Card background", defaultValue: "#FFFFFF" },
-  { key: "textColor", label: "Text color", defaultValue: "#18181B" },
-  { key: "accentColor", label: "Accent color", defaultValue: "#7C3AED" },
-  { key: "ctaBackgroundColor", label: "Button background", defaultValue: "#7C3AED" },
-  { key: "ctaTextColor", label: "Button text", defaultValue: "#FFFFFF" },
+const NEUTRAL_PRESETS = ["#FFFFFF", "#F4F4F5", "#E4E4E7", "#18181B", "#0B0B0E"];
+const TEXT_PRESETS = ["#18181B", "#3F3F46", "#71717A", "#FFFFFF"];
+const BRAND_PRESETS = ["#7C3AED", "#2563EB", "#059669", "#DC2626", "#EA580C", "#DB2777", "#18181B"];
+const CTA_TEXT_PRESETS = ["#FFFFFF", "#18181B"];
+
+const COLOR_FIELDS: { key: keyof FormTheme; label: string; defaultValue: string; presets: string[] }[] = [
+  { key: "cardBackgroundColor", label: "Card background", defaultValue: "#FFFFFF", presets: NEUTRAL_PRESETS },
+  { key: "textColor", label: "Text color", defaultValue: "#18181B", presets: TEXT_PRESETS },
+  { key: "accentColor", label: "Accent color", defaultValue: "#7C3AED", presets: BRAND_PRESETS },
+  { key: "ctaBackgroundColor", label: "Button background", defaultValue: "#7C3AED", presets: BRAND_PRESETS },
+  { key: "ctaTextColor", label: "Button text", defaultValue: "#FFFFFF", presets: CTA_TEXT_PRESETS },
 ];
 
 export function FormThemeEditor({
@@ -24,7 +30,7 @@ export function FormThemeEditor({
   onChange: (theme: FormTheme) => void;
 }) {
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-5">
       <div className="grid grid-cols-2 gap-4">
         <label className="flex flex-col gap-1 text-sm">
           Font size
@@ -56,17 +62,11 @@ export function FormThemeEditor({
         </label>
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-        {COLOR_FIELDS.map(({ key, label, defaultValue }) => (
-          <div key={key} className="flex flex-col gap-1 text-sm">
-            {label}
-            <div className="flex items-center gap-2">
-              <input
-                type="color"
-                value={(theme[key] as string | undefined) ?? defaultValue}
-                onChange={(e) => onChange({ ...theme, [key]: e.target.value })}
-                className="h-9 w-9 shrink-0 rounded border border-black/15 dark:border-white/20 bg-transparent p-0.5 cursor-pointer"
-              />
+      <div className="flex flex-col gap-4">
+        {COLOR_FIELDS.map(({ key, label, defaultValue, presets }) => (
+          <div key={key} className="flex flex-col gap-1.5 text-sm">
+            <div className="flex items-center justify-between">
+              <span>{label}</span>
               {theme[key] && (
                 <button
                   type="button"
@@ -77,6 +77,11 @@ export function FormThemeEditor({
                 </button>
               )}
             </div>
+            <ColorSwatchPicker
+              value={(theme[key] as string | undefined) ?? defaultValue}
+              presets={presets}
+              onChange={(hex) => onChange({ ...theme, [key]: hex })}
+            />
           </div>
         ))}
       </div>
