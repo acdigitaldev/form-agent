@@ -12,6 +12,7 @@ import {
 import { FORM_TEMPLATES, getTemplate } from "@/lib/templates";
 import { isPro } from "@/lib/plan";
 import { hasFileField, slugSchema } from "@/lib/formFields";
+import { formThemeSchema } from "@/lib/formTheme";
 
 const fieldTypeSchema = z
   .enum(["text", "email", "phone", "textarea", "select", "checkbox", "number", "url", "file"])
@@ -64,6 +65,9 @@ export function buildMcpServerForWorkspace(workspace: { id: string; plan: string
         webhookUrl: z.string().url().optional().describe("Pro only — POSTed on every submission"),
         slug: slugSchema.optional().describe("Custom public link slug, e.g. 'my-form' for /f/my-form. Auto-generated from the name if omitted."),
         publicTitle: z.string().optional().describe("Overrides the browser tab title on the public form page; defaults to the form name"),
+        theme: formThemeSchema.optional().describe(
+          "Visual design overrides for the public page: fontSize ('sm'|'md'|'lg'), cornerRadius ('none'|'sm'|'md'|'lg'|'full'), and hex colors cardBackgroundColor/textColor/accentColor/ctaBackgroundColor/ctaTextColor"
+        ),
       },
     },
     async (input) => {
@@ -174,6 +178,9 @@ export function buildMcpServerForWorkspace(workspace: { id: string; plan: string
         slug: slugSchema.optional().describe("Custom public link slug, e.g. 'my-form' for /f/my-form"),
         publicTitle: z.string().nullable().optional().describe("Overrides the browser tab title on the public form page"),
         logoUrl: z.string().url().nullable().optional().describe("Pro only — image URL shown above the form on the public page"),
+        theme: formThemeSchema.nullable().optional().describe(
+          "Visual design overrides for the public page: fontSize ('sm'|'md'|'lg'), cornerRadius ('none'|'sm'|'md'|'lg'|'full'), and hex colors cardBackgroundColor/textColor/accentColor/ctaBackgroundColor/ctaTextColor. Pass null to reset to defaults."
+        ),
       },
     },
     async ({ formId, ...patch }) => {

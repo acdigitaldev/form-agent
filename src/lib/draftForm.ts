@@ -1,3 +1,5 @@
+import type { FormTheme } from "@/lib/formTheme";
+
 const DRAFT_KEY = "agentforms_draft_form";
 
 export type DraftForm = {
@@ -8,6 +10,7 @@ export type DraftForm = {
   ctaText?: string;
   successMessage?: string;
   redirectUrl?: string;
+  theme?: FormTheme;
 };
 
 export function saveDraftForm(draft: DraftForm) {

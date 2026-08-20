@@ -2,6 +2,7 @@
 
 import type { FormField } from "@/lib/formFields";
 import { FileFieldInput } from "@/components/FileFieldInput";
+import type { ResolvedFormTheme } from "@/lib/formTheme";
 
 export function FormFieldsRenderer({
   fields,
@@ -9,6 +10,7 @@ export function FormFieldsRenderer({
   onChange,
   fieldErrors = {},
   formSlug,
+  theme,
 }: {
   fields: FormField[];
   values: Record<string, string>;
@@ -16,7 +18,11 @@ export function FormFieldsRenderer({
   fieldErrors?: Record<string, string>;
   /** Live form slug — enables real uploads for "file" fields. Omit for dashboard previews. */
   formSlug?: string;
+  /** Resolved per-form design theme. Omit to use the default look. */
+  theme?: ResolvedFormTheme;
 }) {
+  const inputStyle = theme ? { borderRadius: theme.radiusPx } : undefined;
+
   return (
     <>
       {fields.map((field) => {
@@ -40,6 +46,7 @@ export function FormFieldsRenderer({
                 value={values[field.id] ?? ""}
                 onChange={(e) => onChange(field.id, e.target.value)}
                 rows={4}
+                style={inputStyle}
                 className="rounded-md border border-black/15 dark:border-white/20 bg-transparent px-3 py-2 outline-none focus:border-black/40 dark:focus:border-white/40"
               />
             ) : field.type === "select" ? (
@@ -47,6 +54,7 @@ export function FormFieldsRenderer({
                 required={field.required}
                 value={values[field.id] ?? ""}
                 onChange={(e) => onChange(field.id, e.target.value)}
+                style={inputStyle}
                 className="rounded-md border border-black/15 dark:border-white/20 bg-transparent px-3 py-2 outline-none"
               >
                 <option value="" disabled>
@@ -64,6 +72,7 @@ export function FormFieldsRenderer({
                   type="checkbox"
                   checked={values[field.id] === "true"}
                   onChange={(e) => onChange(field.id, e.target.checked ? "true" : "")}
+                  style={theme ? { accentColor: theme.accentColor } : undefined}
                   className="h-4 w-4"
                 />
                 {field.label}
@@ -83,6 +92,7 @@ export function FormFieldsRenderer({
                 placeholder={effectivePlaceholder}
                 value={values[field.id] ?? ""}
                 onChange={(e) => onChange(field.id, e.target.value)}
+                style={inputStyle}
                 className="rounded-md border border-black/15 dark:border-white/20 bg-transparent px-3 py-2 outline-none focus:border-black/40 dark:focus:border-white/40"
               />
             )}

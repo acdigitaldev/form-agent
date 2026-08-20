@@ -5,7 +5,10 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { FormFieldsEditor } from "@/components/FormFieldsEditor";
 import { LogoUploadInput } from "@/components/LogoUploadInput";
+import { FormThemeEditor } from "@/components/FormThemeEditor";
+import { FormPreview } from "@/components/FormPreview";
 import type { FormField } from "@/lib/formFields";
+import type { FormTheme } from "@/lib/formTheme";
 
 export function FormSettingsEditor({
   formId,
@@ -21,6 +24,7 @@ export function FormSettingsEditor({
   initialSlug,
   initialPublicTitle,
   initialLogoUrl,
+  initialTheme,
   origin,
   isPro,
 }: {
@@ -37,6 +41,7 @@ export function FormSettingsEditor({
   initialSlug: string;
   initialPublicTitle: string;
   initialLogoUrl: string;
+  initialTheme: FormTheme;
   origin: string;
   isPro: boolean;
 }) {
@@ -53,6 +58,7 @@ export function FormSettingsEditor({
   const [slug, setSlug] = useState(initialSlug);
   const [publicTitle, setPublicTitle] = useState(initialPublicTitle);
   const [logoUrl, setLogoUrl] = useState(initialLogoUrl);
+  const [theme, setTheme] = useState<FormTheme>(initialTheme);
   const [status, setStatus] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -76,6 +82,7 @@ export function FormSettingsEditor({
         ctaText: ctaText || "Submit",
         slug,
         publicTitle: publicTitle || null,
+        theme,
         ...(isPro ? { webhookUrl: webhookUrl || null, logoUrl: logoUrl || null } : {}),
       }),
     });
@@ -175,8 +182,18 @@ export function FormSettingsEditor({
       )}
 
       <div>
+        <p className="text-sm font-medium mb-3">Design</p>
+        <FormThemeEditor theme={theme} onChange={setTheme} />
+      </div>
+
+      <div>
         <p className="text-sm font-medium mb-3">Fields</p>
         <FormFieldsEditor fields={fields} onChange={setFields} />
+      </div>
+
+      <div>
+        <p className="text-sm font-medium mb-3">Preview</p>
+        <FormPreview name={name} description={description} fields={fields} gdprText={gdprText} ctaText={ctaText} theme={theme} />
       </div>
 
       <label className="flex flex-col gap-1 text-sm">

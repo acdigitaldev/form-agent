@@ -3,11 +3,13 @@
 import { useState, useRef } from "react";
 import { FormFieldsEditor, emptyField } from "@/components/FormFieldsEditor";
 import { FormPreview } from "@/components/FormPreview";
+import { FormThemeEditor } from "@/components/FormThemeEditor";
 import { FORM_TEMPLATES, type FormTemplate } from "@/lib/templates";
 import type { FormField } from "@/lib/formFields";
+import type { FormTheme } from "@/lib/formTheme";
 import type { DraftForm } from "@/lib/draftForm";
 
-const STEPS = ["Template", "Basics", "Fields", "GDPR & messaging", "Review"] as const;
+const STEPS = ["Template", "Basics", "Fields", "Design & messaging", "Review"] as const;
 
 const DEFAULT_GDPR_TEXT =
   "By submitting this form, you agree to let us store and process the information above to respond to your request.";
@@ -71,6 +73,7 @@ export function FormWizard({
   const [ctaText, setCtaText] = useState("Submit");
   const [successMessage, setSuccessMessage] = useState("Thanks! Your submission was received.");
   const [redirectUrl, setRedirectUrl] = useState("");
+  const [theme, setTheme] = useState<FormTheme>({});
 
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -119,6 +122,7 @@ export function FormWizard({
       ctaText: ctaText || "Submit",
       successMessage,
       redirectUrl: redirectUrl || undefined,
+      theme,
     };
   }
 
@@ -216,6 +220,10 @@ export function FormWizard({
 
             {step === 3 && (
               <div className="flex flex-col gap-6">
+                <div>
+                  <p className="text-sm font-medium mb-3">Design</p>
+                  <FormThemeEditor theme={theme} onChange={setTheme} />
+                </div>
                 <label className="flex flex-col gap-1 text-sm">
                   Submit button text
                   <input
@@ -350,6 +358,7 @@ export function FormWizard({
               fields={cleanFields}
               gdprText={gdprText}
               ctaText={ctaText}
+              theme={theme}
             />
           </div>
         </div>

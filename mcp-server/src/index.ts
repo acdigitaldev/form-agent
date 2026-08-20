@@ -16,6 +16,23 @@ const slugSchema = z
   .max(60)
   .regex(/^[a-z0-9]+(-[a-z0-9]+)*$/, "Use lowercase letters, numbers, and hyphens only");
 
+const hexColorSchema = z.string().regex(/^#[0-9a-fA-F]{6}$/, "Must be a hex color like #7C3AED");
+
+const themeSchema = z
+  .object({
+    fontSize: z.enum(["sm", "md", "lg"]).optional(),
+    cornerRadius: z.enum(["none", "sm", "md", "lg", "full"]).optional(),
+    cardBackgroundColor: hexColorSchema.optional(),
+    textColor: hexColorSchema.optional(),
+    accentColor: hexColorSchema.optional(),
+    ctaBackgroundColor: hexColorSchema.optional(),
+    ctaTextColor: hexColorSchema.optional(),
+  })
+  .strict()
+  .describe(
+    "Visual design overrides for the public page: fontSize ('sm'|'md'|'lg'), cornerRadius ('none'|'sm'|'md'|'lg'|'full'), and hex colors cardBackgroundColor/textColor/accentColor/ctaBackgroundColor/ctaTextColor"
+  );
+
 const fieldSchema = z.object({
   id: z.string().describe("Stable key for this field, used as the key in submission data (e.g. 'email')"),
   label: z.string().describe("Human-readable label shown on the form"),
@@ -55,6 +72,7 @@ server.registerTool(
       webhookUrl: z.string().url().optional().describe("Pro only — POSTed on every submission"),
       slug: slugSchema.optional().describe("Custom public link slug, e.g. 'my-form' for /f/my-form. Auto-generated from the name if omitted."),
       publicTitle: z.string().optional().describe("Overrides the browser tab title on the public form page; defaults to the form name"),
+      theme: themeSchema.optional(),
     },
   },
   async (input) => {
@@ -167,6 +185,9 @@ server.registerTool(
       slug: slugSchema.optional().describe("Custom public link slug, e.g. 'my-form' for /f/my-form"),
       publicTitle: z.string().nullable().optional().describe("Overrides the browser tab title on the public form page"),
       logoUrl: z.string().url().nullable().optional().describe("Pro only — image URL shown above the form on the public page"),
+      theme: themeSchema.nullable().optional().describe(
+        themeSchema.description + ". Pass null to reset to defaults."
+      ),
     },
   },
   async ({ formId, ...patch }) => {

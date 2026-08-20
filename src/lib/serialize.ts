@@ -1,4 +1,5 @@
 import { parseFields } from "@/lib/formFields";
+import { parseTheme } from "@/lib/formTheme";
 
 type FormRecord = {
   id: string;
@@ -13,6 +14,7 @@ type FormRecord = {
   webhookUrl: string | null;
   publicTitle: string | null;
   logoUrl: string | null;
+  theme: string | null;
   isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
@@ -33,6 +35,7 @@ export function serializeForm(form: FormRecord) {
     webhookUrl: form.webhookUrl,
     publicTitle: form.publicTitle,
     logoUrl: form.logoUrl,
+    theme: parseTheme(form.theme),
     isActive: form.isActive,
     createdAt: form.createdAt,
     updatedAt: form.updatedAt,

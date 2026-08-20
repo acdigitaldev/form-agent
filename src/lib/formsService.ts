@@ -2,6 +2,7 @@ import { prisma } from "@/lib/db";
 import { z } from "zod";
 import { del } from "@vercel/blob";
 import { formFieldsSchema, serializeFields, slugify, slugSchema } from "@/lib/formFields";
+import { formThemeSchema, serializeTheme } from "@/lib/formTheme";
 import { serializeForm, serializeSubmission } from "@/lib/serialize";
 
 /** Thrown when a caller-supplied slug is already taken by another form. */
@@ -23,6 +24,7 @@ export const createFormInput = z.object({
   webhookUrl: z.string().url().optional(),
   slug: slugSchema.optional(),
   publicTitle: z.string().max(120).optional(),
+  theme: formThemeSchema.optional(),
 });
 export type CreateFormInput = z.infer<typeof createFormInput>;
 
@@ -39,6 +41,7 @@ export const updateFormInput = z.object({
   slug: slugSchema.optional(),
   publicTitle: z.string().max(120).nullable().optional(),
   logoUrl: z.string().url().nullable().optional(),
+  theme: formThemeSchema.nullable().optional(),
 });
 export type UpdateFormInput = z.infer<typeof updateFormInput>;
 
@@ -89,6 +92,7 @@ export async function createForm(workspaceId: string, input: CreateFormInput) {
       ...(input.ctaText !== undefined ? { ctaText: input.ctaText } : {}),
       ...(input.webhookUrl !== undefined ? { webhookUrl: input.webhookUrl } : {}),
       ...(input.publicTitle !== undefined ? { publicTitle: input.publicTitle } : {}),
+      ...(input.theme !== undefined ? { theme: serializeTheme(input.theme) } : {}),
     },
     include: { _count: { select: { submissions: true } } },
   });
@@ -131,6 +135,7 @@ export async function updateForm(workspaceId: string, formId: string, patch: Upd
       ...(patch.slug !== undefined ? { slug: patch.slug } : {}),
       ...(patch.publicTitle !== undefined ? { publicTitle: patch.publicTitle } : {}),
       ...(patch.logoUrl !== undefined ? { logoUrl: patch.logoUrl } : {}),
+      ...(patch.theme !== undefined ? { theme: patch.theme ? serializeTheme(patch.theme) : null } : {}),
     },
     include: { _count: { select: { submissions: true } } },
   });

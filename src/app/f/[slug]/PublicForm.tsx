@@ -3,6 +3,7 @@
 import { useState } from "react";
 import type { FormField } from "@/lib/formFields";
 import { FormFieldsRenderer } from "@/components/FormFieldsRenderer";
+import type { ResolvedFormTheme } from "@/lib/formTheme";
 
 export function PublicForm({
   slug,
@@ -10,12 +11,14 @@ export function PublicForm({
   successMessage,
   gdprText,
   ctaText,
+  theme,
 }: {
   slug: string;
   fields: FormField[];
   successMessage: string;
   gdprText?: string;
   ctaText?: string;
+  theme?: ResolvedFormTheme;
 }) {
   const [values, setValues] = useState<Record<string, string>>({});
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
@@ -77,6 +80,7 @@ export function PublicForm({
         onChange={setValue}
         fieldErrors={fieldErrors}
         formSlug={slug}
+        theme={theme}
       />
 
       {error && !Object.keys(fieldErrors).length && <p className="text-sm text-red-600">{error}</p>}
@@ -84,7 +88,12 @@ export function PublicForm({
       <button
         type="submit"
         disabled={status === "submitting"}
-        className="self-start rounded-md bg-accent text-white px-5 py-2.5 font-medium hover:bg-accent-hover disabled:opacity-50"
+        style={
+          theme
+            ? { backgroundColor: theme.ctaBackgroundColor, color: theme.ctaTextColor, borderRadius: theme.radiusPx }
+            : undefined
+        }
+        className="self-start rounded-md bg-accent text-white px-5 py-2.5 font-medium hover:opacity-90 disabled:opacity-50"
       >
         {status === "submitting" ? "Submitting…" : ctaText || "Submit"}
       </button>

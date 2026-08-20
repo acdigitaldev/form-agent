@@ -82,6 +82,7 @@ export default async function FormDetailPage({ params }: { params: Promise<{ id:
           initialSlug={form.slug}
           initialPublicTitle={form.publicTitle ?? ""}
           initialLogoUrl={form.logoUrl ?? ""}
+          initialTheme={form.theme}
           origin={process.env.APP_URL ?? "http://localhost:3000"}
           isPro={isPro(workspace)}
         />

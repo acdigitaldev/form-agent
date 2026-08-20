@@ -30,6 +30,10 @@ export const PLAN_FEATURES: { free: PlanFeature[]; pro: PlanFeature[] } = {
       description: "Editable privacy notice and submit-button text on every form, out of the box.",
     },
     {
+      title: "Full design customization",
+      description: "Font size, corner radius, and colors for the card, text, and submit button — no CSS needed.",
+    },
+    {
       title: "Submissions dashboard",
       description: "30-day analytics, per-form filtering, and a live feed of every lead you capture.",
     },

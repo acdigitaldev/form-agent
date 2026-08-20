@@ -164,6 +164,19 @@
         "enum": ["text", "email", "phone", "textarea", "select", "checkbox", "number", "url", "file"],
         "description": "'file' is Pro only — end-users upload a file (e.g. a CV or image) directly on the form. A form may have at most 3 file fields."
       },
+      "FormTheme": {
+        "type": "object",
+        "description": "Visual design overrides for the public page. All fields optional — unset fields fall back to AgentForms' default violet theme.",
+        "properties": {
+          "fontSize": { "type": "string", "enum": ["sm", "md", "lg"] },
+          "cornerRadius": { "type": "string", "enum": ["none", "sm", "md", "lg", "full"] },
+          "cardBackgroundColor": { "type": "string", "description": "Hex color, e.g. #FFFFFF" },
+          "textColor": { "type": "string", "description": "Hex color, e.g. #18181B" },
+          "accentColor": { "type": "string", "description": "Hex color, e.g. #7C3AED" },
+          "ctaBackgroundColor": { "type": "string", "description": "Hex color for the submit button background" },
+          "ctaTextColor": { "type": "string", "description": "Hex color for the submit button text" }
+        }
+      },
       "FormField": {
         "type": "object",
         "required": ["id", "label", "type"],
@@ -190,7 +203,8 @@
           "ctaText": { "type": "string", "description": "Submit button label, defaults to 'Submit'" },
           "webhookUrl": { "type": "string", "format": "uri", "description": "Pro only — POSTed on every submission" },
           "slug": { "type": "string", "description": "Custom public link slug, e.g. 'my-form' for /f/my-form. Auto-generated from the name if omitted. Lowercase letters, numbers, and hyphens only." },
-          "publicTitle": { "type": "string", "description": "Overrides the browser tab title on the public form page; defaults to the form name" }
+          "publicTitle": { "type": "string", "description": "Overrides the browser tab title on the public form page; defaults to the form name" },
+          "theme": { "$ref": "#/components/schemas/FormTheme" }
         }
       },
       "UpdateFormRequest": {
@@ -207,7 +221,8 @@
           "isActive": { "type": "boolean" },
           "slug": { "type": "string", "description": "Custom public link slug, e.g. 'my-form' for /f/my-form. Lowercase letters, numbers, and hyphens only. 409 if already taken." },
           "publicTitle": { "type": "string", "nullable": true, "description": "Overrides the browser tab title on the public form page" },
-          "logoUrl": { "type": "string", "nullable": true, "description": "Pro only — image URL shown above the form on the public page. Set via the dashboard logo upload, or directly here." }
+          "logoUrl": { "type": "string", "nullable": true, "description": "Pro only — image URL shown above the form on the public page. Set via the dashboard logo upload, or directly here." },
+          "theme": { "allOf": [{ "$ref": "#/components/schemas/FormTheme" }], "nullable": true, "description": "Pass null to reset to defaults" }
         }
       },
       "Form": {
@@ -223,6 +238,7 @@
           "webhookUrl": { "type": "string", "nullable": true },
           "publicTitle": { "type": "string", "nullable": true },
           "logoUrl": { "type": "string", "nullable": true },
+          "theme": { "$ref": "#/components/schemas/FormTheme" },
           "successMessage": { "type": "string" },
           "redirectUrl": { "type": "string", "nullable": true },
           "isActive": { "type": "boolean" },
