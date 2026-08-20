@@ -161,7 +161,7 @@ export function TeamManager({
             <button
               type="submit"
               disabled={sending}
-              className="rounded-md bg-foreground text-background px-4 py-2 text-sm font-medium hover:opacity-90 disabled:opacity-50"
+              className="rounded-md bg-accent text-white px-4 py-2 text-sm font-medium hover:bg-accent-hover disabled:opacity-50"
             >
               {sending ? "Sending…" : "Send invite"}
             </button>

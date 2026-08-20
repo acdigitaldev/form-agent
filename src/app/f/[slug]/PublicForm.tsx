@@ -84,7 +84,7 @@ export function PublicForm({
       <button
         type="submit"
         disabled={status === "submitting"}
-        className="self-start rounded-md bg-foreground text-background px-5 py-2.5 font-medium hover:opacity-90 disabled:opacity-50"
+        className="self-start rounded-md bg-accent text-white px-5 py-2.5 font-medium hover:bg-accent-hover disabled:opacity-50"
       >
         {status === "submitting" ? "Submitting…" : ctaText || "Submit"}
       </button>

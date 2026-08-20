@@ -18,7 +18,7 @@ export function ConnectorTabs({ serverUrl }: { serverUrl: string }) {
             onClick={() => setTab(t)}
             className={`rounded-md px-3 py-1.5 text-sm border ${
               tab === t
-                ? "border-foreground bg-foreground text-background"
+                ? "border-foreground bg-accent text-white"
                 : "border-black/15 dark:border-white/20 hover:bg-black/5 dark:hover:bg-white/10"
             }`}
           >
@@ -80,7 +80,7 @@ export function ConnectorTabs({ serverUrl }: { serverUrl: string }) {
 function Step({ n, title, children }: { n: number; title: string; children: React.ReactNode }) {
   return (
     <li className="flex gap-3">
-      <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-foreground text-background text-xs font-medium">
+      <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-accent text-white text-xs font-medium">
         {n}
       </span>
       <div>

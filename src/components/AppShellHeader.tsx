@@ -6,7 +6,7 @@ export async function AppShellHeader({ active }: { active?: "forms" | "docs" | "
   const session = await auth();
 
   const linkClass = (id: string) =>
-    `hover:underline ${active === id ? "font-medium" : "text-black/70 dark:text-white/70"}`;
+    `hover:underline ${active === id ? "font-medium text-accent" : "text-black/70 dark:text-white/70"}`;
 
   return (
     <header className="border-b border-black/10 dark:border-white/10">
@@ -27,7 +27,7 @@ export async function AppShellHeader({ active }: { active?: "forms" | "docs" | "
           {session?.user ? (
             <Link
               href="/dashboard"
-              className="rounded-md bg-foreground text-background px-3 py-1.5 font-medium hover:opacity-90"
+              className="rounded-md bg-accent text-white px-3 py-1.5 font-medium hover:bg-accent-hover"
             >
               Go to dashboard
             </Link>
@@ -38,7 +38,7 @@ export async function AppShellHeader({ active }: { active?: "forms" | "docs" | "
               </Link>
               <Link
                 href="/register"
-                className="rounded-md bg-foreground text-background px-3 py-1.5 font-medium hover:opacity-90"
+                className="rounded-md bg-accent text-white px-3 py-1.5 font-medium hover:bg-accent-hover"
               >
                 Sign up
               </Link>

@@ -20,7 +20,7 @@ function Stepper({ step }: { step: number }) {
           <span
             className={`flex items-center gap-2 rounded-full px-3 py-1 ${
               i === step
-                ? "bg-foreground text-background"
+                ? "bg-accent text-white"
                 : i < step
                   ? "text-black/50 dark:text-white/50"
                   : "text-black/30 dark:text-white/30"
@@ -315,7 +315,7 @@ export function FormWizard({
                 <button
                   type="button"
                   onClick={goNext}
-                  className="rounded-md bg-foreground text-background px-5 py-2.5 font-medium hover:opacity-90"
+                  className="rounded-md bg-accent text-white px-5 py-2.5 font-medium hover:bg-accent-hover"
                 >
                   Continue
                 </button>
@@ -325,7 +325,7 @@ export function FormWizard({
                     type="button"
                     onClick={handleSubmit}
                     disabled={loading}
-                    className="rounded-md bg-foreground text-background px-5 py-2.5 font-medium hover:opacity-90 disabled:opacity-50"
+                    className="rounded-md bg-accent text-white px-5 py-2.5 font-medium hover:bg-accent-hover disabled:opacity-50"
                   >
                     {loading ? "Working…" : submitLabel}
                   </button>

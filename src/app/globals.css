@@ -1,21 +1,64 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #fafafa;
+  --surface: #ffffff;
+  --surface-alt: #f4f4f5;
+  --border: #e4e4e7;
+
+  --foreground: #18181b;
+  --foreground-secondary: #71717a;
+  --foreground-tertiary: #a1a1aa;
+
+  --accent: #7c3aed;
+  --accent-hover: #6d28d9;
+  --accent-tint-bg: #f5f3ff;
+  --accent-tint-border: #ddd6fe;
+
+  --success: #16a34a;
+  --error: #dc2626;
 }
 
 @theme inline {
   --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-surface-alt: var(--surface-alt);
+  --color-border: var(--border);
+
   --color-foreground: var(--foreground);
+  --color-foreground-secondary: var(--foreground-secondary);
+  --color-foreground-tertiary: var(--foreground-tertiary);
+
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-tint-bg: var(--accent-tint-bg);
+  --color-accent-tint-border: var(--accent-tint-border);
+
+  --color-success: var(--success);
+  --color-error: var(--error);
+
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #0b0b0e;
+    --surface: #18181b;
+    --surface-alt: #202024;
+    --border: #303036;
+
+    --foreground: #fafafa;
+    --foreground-secondary: #a1a1aa;
+    --foreground-tertiary: #71717a;
+
+    --accent: #8b5cf6;
+    --accent-hover: #a78bfa;
+    --accent-tint-bg: #2e1065;
+    --accent-tint-border: #4c1d95;
+
+    --success: #22c55e;
+    --error: #f87171;
   }
 }
 
@@ -23,4 +66,9 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+input[type="checkbox"],
+input[type="radio"] {
+  accent-color: var(--accent);
 }

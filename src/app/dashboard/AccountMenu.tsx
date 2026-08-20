@@ -24,7 +24,7 @@ export function AccountMenu({ email, workspaceName }: { email: string; workspace
         type="button"
         onClick={() => setOpen((o) => !o)}
         aria-label="Account menu"
-        className="flex h-8 w-8 items-center justify-center rounded-full bg-foreground text-background text-sm font-medium hover:opacity-90"
+        className="flex h-8 w-8 items-center justify-center rounded-full bg-accent text-white text-sm font-medium hover:bg-accent-hover"
       >
         {initial}
       </button>

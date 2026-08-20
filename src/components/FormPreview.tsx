@@ -42,7 +42,7 @@ export function FormPreview({
 
         <button
           type="button"
-          className="self-start rounded-md bg-foreground text-background px-5 py-2.5 font-medium"
+          className="self-start rounded-md bg-accent text-white px-5 py-2.5 font-medium"
         >
           {ctaText || "Submit"}
         </button>

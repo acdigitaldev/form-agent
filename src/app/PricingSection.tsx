@@ -67,7 +67,7 @@ export function PricingSection() {
         </div>
 
         <div className="rounded-lg border-2 border-foreground p-6 flex flex-col gap-5 relative">
-          <span className="absolute -top-3 left-6 rounded-full bg-foreground text-background text-xs px-2 py-0.5">
+          <span className="absolute -top-3 left-6 rounded-full bg-accent text-white text-xs px-2 py-0.5">
             Recommended
           </span>
           <div>
@@ -98,7 +98,7 @@ export function PricingSection() {
           </ul>
           <Link
             href="/register"
-            className="rounded-md bg-foreground text-background px-4 py-2 text-sm font-medium text-center hover:opacity-90"
+            className="rounded-md bg-accent text-white px-4 py-2 text-sm font-medium text-center hover:bg-accent-hover"
           >
             Get started
           </Link>

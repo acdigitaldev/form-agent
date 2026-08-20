@@ -4,15 +4,7 @@ import { auth } from "@/auth";
 import { getUserWorkspace, createWorkspaceForUser } from "@/lib/workspace";
 import { Logo } from "@/components/Logo";
 import { AccountMenu } from "./AccountMenu";
-
-const NAV_LINKS = [
-  { href: "/dashboard", label: "Forms" },
-  { href: "/dashboard/submissions", label: "Submissions" },
-  { href: "/dashboard/connectors", label: "Connectors" },
-  { href: "/docs", label: "Docs" },
-  { href: "/pricing", label: "Pricing" },
-  { href: "/dashboard/settings", label: "Settings" },
-];
+import { DashboardNav } from "./DashboardNav";
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const session = await auth();
@@ -32,13 +24,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
             <Link href="/dashboard">
               <Logo />
             </Link>
-            <nav className="flex items-center gap-5 text-sm">
-              {NAV_LINKS.map((link) => (
-                <Link key={link.href} href={link.href} className="hover:underline">
-                  {link.label}
-                </Link>
-              ))}
-            </nav>
+            <DashboardNav />
           </div>
           <AccountMenu email={session.user.email ?? ""} workspaceName={workspace.name} />
         </div>

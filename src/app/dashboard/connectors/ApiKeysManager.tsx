@@ -90,7 +90,7 @@ export function ApiKeysManager({ initialKeys, appUrl }: { initialKeys: ApiKeyRow
         <button
           type="submit"
           disabled={creating}
-          className="rounded-md bg-foreground text-background px-4 py-2 text-sm font-medium hover:opacity-90 disabled:opacity-50"
+          className="rounded-md bg-accent text-white px-4 py-2 text-sm font-medium hover:bg-accent-hover disabled:opacity-50"
         >
           {creating ? "Creating…" : "Generate token"}
         </button>

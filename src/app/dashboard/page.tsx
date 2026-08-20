@@ -29,20 +29,20 @@ export default async function DashboardPage({
           <div className="flex rounded-md border border-black/15 dark:border-white/20 text-sm overflow-hidden">
             <Link
               href="/dashboard?sort=newest"
-              className={`px-3 py-1.5 ${sortOrder === "newest" ? "bg-foreground text-background" : "hover:bg-black/5 dark:hover:bg-white/10"}`}
+              className={`px-3 py-1.5 ${sortOrder === "newest" ? "bg-accent text-white" : "hover:bg-black/5 dark:hover:bg-white/10"}`}
             >
               Newest
             </Link>
             <Link
               href="/dashboard?sort=oldest"
-              className={`px-3 py-1.5 border-l border-black/15 dark:border-white/20 ${sortOrder === "oldest" ? "bg-foreground text-background" : "hover:bg-black/5 dark:hover:bg-white/10"}`}
+              className={`px-3 py-1.5 border-l border-black/15 dark:border-white/20 ${sortOrder === "oldest" ? "bg-accent text-white" : "hover:bg-black/5 dark:hover:bg-white/10"}`}
             >
               Oldest
             </Link>
           </div>
           <Link
             href="/dashboard/new"
-            className="rounded-md bg-foreground text-background px-4 py-2 text-sm font-medium hover:opacity-90"
+            className="rounded-md bg-accent text-white px-4 py-2 text-sm font-medium hover:bg-accent-hover"
           >
             New form
           </Link>
@@ -58,7 +58,7 @@ export default async function DashboardPage({
           </p>
           <Link
             href="/dashboard/new"
-            className="rounded-md bg-foreground text-background px-4 py-2 text-sm font-medium hover:opacity-90 mt-2"
+            className="rounded-md bg-accent text-white px-4 py-2 text-sm font-medium hover:bg-accent-hover mt-2"
           >
             Create your first form
           </Link>
